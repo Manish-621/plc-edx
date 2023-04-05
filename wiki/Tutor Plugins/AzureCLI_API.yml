@@ -1,0 +1,8 @@
+name: azurecliapi
+version: 0.1.0
+patches:
+  openedx-common-settings: |
+    # azure cli api special settings
+    AZURE_CLI_API_URL = "http://192.168.0.110:5000"
+
+

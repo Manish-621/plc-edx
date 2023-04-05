@@ -1,0 +1,299 @@
+<!--
+    Author : Naren
+    Description : Modal for notifications in edX
+    Used-in : main.html
+-->
+
+<style>
+    .myModal-notification{
+        display: none;
+        position: fixed; /* Stay in place */
+        z-index: 1000002; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(78, 73, 73, 0.05);
+        pointer-events: bounding-box;
+        transition: all 0.3s;
+        font-family: 'Open Sans',sans-serif !important;
+    }
+    .innerModal-notification{
+        border-radius:10px;
+        box-shadow: 0px 1px 8px 0px slategrey;
+        position: absolute;
+        top: -85px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2em;
+        padding:5px 25px;
+        background: #ffffff;
+        min-width: 200px;
+    }
+    .modal-Option{
+        color: #aaa !important;
+        line-height: 40px !important;
+        font-size: 90% !important;
+        right: 0;
+        text-align: center;
+        bottom: 0;
+        width: 70px;
+        text-decoration: none !important;
+        font-family: 'Open Sans',sans-serif !important;
+    }
+    .modal-Option:hover {
+        color: black !important;
+        font-weight: 500 !important;
+    }
+    .modalHeading-notification{
+        font-family: 'Open Sans',sans-serif !important;
+        font-size:16px;
+        margin: 10px 0px 0px 0px;
+    }
+    .col_md_6{
+        width: 50%;
+        float:left;
+    }
+</style>
+
+<div class="myModal-notification" id="AIDNotification">
+    <div class="innerModal-notification">
+      <div class="modalHeader-notification">
+      </div>
+      <div class="modalBody-notification">
+        <div class="modalHeading-notification">
+            <center></center>
+        </div>
+      </div>
+
+      <!--Footer for notifications-->
+      <div class="modalFooter-notification">
+        <center>
+            <a href="#" title="Close" class="modalClose-notification modal-Option">Close</a>
+        </center>
+      </div>
+
+      <!--Footer for decision modals-->
+      <div class="modalFooter-decision row">
+        <div class="col_md_6">
+            <center>
+                <a href="#" title="OK" class="modalDecision-one modal-Option">Ok</a>
+            </center>
+        </div>
+        <div class="col_md_6">
+            <center>
+                <a href="#" title="Close" class="modalDecision-two modal-Option">Close</a>
+            </center>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+<script>
+
+// Constructor which should be used to create option objects
+// Param optionTitle : display title of the option
+// Param funcDelegate : function object which will be called when that particular option is choosed
+// *Note* : function object to hide the notofication with or without animation, will be passed while
+//         calling funcDelegate so user can decide if and when and how to close the modal for each option
+function Notification_Modal_Option(optionTitle, funcDelegate){
+    this._optionTitle=optionTitle;
+    this._funcDelegate = funcDelegate;
+}
+
+notification_manager = Object.freeze(new function(){
+    let speed = 50, modal_Name='';
+    const MAX_TOP = 65, MIN_TOP = -120, animationHeight = 150;
+    let is_Option_Mandatory = false; // when set to false, closes the modal if user clicks anywhere in the window
+    let notificationOption_0 = new Notification_Modal_Option(optionTitle = 'Ok', funcDelegate = null);
+    let decisionOption_1 = new Notification_Modal_Option(optionTitle = 'Ok', funcDelegate = null);
+    let decisionOption_2 = new Notification_Modal_Option(optionTitle = 'Close', funcDelegate = null);
+    
+    const $objs = {
+        notificationOption : $('.modalClose-notification')
+        ,decisionOption1 : $('.modalDecision-one')
+        ,decisionOption2 : $('.modalDecision-two')
+        ,innerNotificationModal : $('.innerModal-notification')
+        ,outerNotificationModal : $('.myModal-notification')
+        ,modalText : $('.modalHeading-notification')
+        ,footerNotification : $('.modalFooter-notification')
+        ,footerDecision : $('.modalFooter-decision')
+    }
+
+    let _setDefaultValues = function(){
+        speed = 50;
+        is_Option_Mandatory = false;
+        notificationOption_0 = new Notification_Modal_Option(optionTitle = 'Ok', funcDelegate = null);
+        decisionOption_1 = new Notification_Modal_Option(optionTitle = 'Ok', funcDelegate = null);
+        decisionOption_2 = new Notification_Modal_Option(optionTitle = 'Close', funcDelegate = null);
+        
+        $objs['notificationOption'].text(notificationOption_0._optionTitle);
+        $objs['notificationOption'].attr('title',notificationOption_0._optionTitle);
+
+        $objs['decisionOption1'].text(decisionOption_1._optionTitle);
+        $objs['decisionOption1'].attr('title',decisionOption_1._optionTitle);
+
+        $objs['decisionOption2'].attr('title',decisionOption_1._optionTitle);
+        $objs['decisionOption2'].text(decisionOption_1._optionTitle);
+    }
+
+    let _setDecisionOptions = function(DecisionOption_1, DecisionOption_2){
+        decisionOption_1 = DecisionOption_1??decisionOption_1;
+        decisionOption_2 = DecisionOption_2??decisionOption_2;
+
+        $objs['decisionOption1'].text(decisionOption_1._optionTitle);
+        $objs['decisionOption1'].attr('title',decisionOption_1._optionTitle);
+
+        $objs['decisionOption2'].attr('title',decisionOption_2._optionTitle);
+        $objs['decisionOption2'].text(decisionOption_2._optionTitle);
+    }
+
+    let _setNotificationOptions = function(NotificationOption_0){
+        notificationOption_0 = NotificationOption_0??notificationOption_0;
+
+        $objs['notificationOption'].text(notificationOption_0._optionTitle);
+        $objs['notificationOption'].attr('title',notificationOption_0._optionTitle);
+    }
+    
+    let _performModalOperations = function(target){
+        if(target.hasClass('modal-Option')){
+            if(target.hasClass('modalClose-notification')){
+                _executeOptionDelegates(notificationOption_0)
+            }
+            else if(target.hasClass('modalDecision-one')){
+                _executeOptionDelegates(decisionOption_1)
+            }
+            else if(target.hasClass('modalDecision-two')){
+                _executeOptionDelegates(decisionOption_2)
+            }
+        }
+    }
+
+    let _executeOptionDelegates = function(modalOptionObject){
+        if(modalOptionObject._funcDelegate !== null){
+            modalOptionObject._funcDelegate(_hideNotification);
+        }
+        else{
+            _hideNotification(animate = true);
+        }
+    }
+
+    let _getCurrentModalPos = function(){
+        return parseInt($objs['innerNotificationModal'].css('top').replace('px',''));
+    }
+
+    let _isModalInView = function(ModalName=null){
+        if(_getCurrentModalPos() > 0){
+            if( ModalName == null || (modal_Name != '' && modal_Name != null && modal_Name == ModalName) )
+                return true;
+        }
+            
+        return false;
+    }
+
+    let _toggleVerticalMoment = function(speed = 1, hide = false){
+        if(speed == 0) speed = 1;
+        let currentPos = _getCurrentModalPos();
+        let targetPos = hide ? MIN_TOP: MAX_TOP;
+        let diff = targetPos-currentPos
+        let incr = (targetPos-currentPos)/speed;
+        let timer = setInterval (function () { 
+            currentPos = currentPos + incr;
+            $objs['innerNotificationModal'].css('top',currentPos + "px");
+            if ( (hide && currentPos <= MIN_TOP) || (!hide && currentPos >= MAX_TOP) ){
+                clearInterval(timer);
+                if(hide){
+                    $objs['outerNotificationModal'].hide();
+                }
+            }
+        }, 1);
+    }
+
+    let _hideNotification = function(animate = true){
+        if(animate){
+            _toggleVerticalMoment(speed, hide = true);
+        }
+        else{
+            $objs['outerNotificationModal'].hide();
+            $objs['innerNotificationModal'].css('top',MIN_TOP + "px");
+        }
+        _setDefaultValues();
+    }
+
+    // Call this method as notification_manager.showNotification() whenever a notification modal is needed
+    // Param Message : message that needs to be displayed
+    // Param Speed : speed of the modal while being visble. 1 being the fastest and 100 being the preferable slowest.
+    // Param Is_Option_Mandatory : when set to false, closes the modal if user clicks anywhere in the window
+    // Param NotificationOption_0 : Option 1 of notification box.
+    let _showNotification = function(Message, Speed = 50, Is_Option_Mandatory = false, NotificationOption_0 = null, ModalName = null){
+        if(_isModalInView())
+            _hideNotification(animate = false);
+        $objs['modalText'].html(Message);
+        speed = Speed;
+        modal_Name = ModalName;
+        is_Option_Mandatory = Is_Option_Mandatory;
+        if(NotificationOption_0 != null){
+            _setNotificationOptions(NotificationOption_0);
+            notificationOption_0 = NotificationOption_0;
+        }
+        $objs['footerDecision'].hide();
+        $objs['footerNotification'].show();
+        $objs['outerNotificationModal'].show();
+        $objs['innerNotificationModal'].focus();
+        _toggleVerticalMoment(speed);
+    }
+
+    // Call this method as notification_manager.showNotification() whenever a notification modal is needed
+    // Param Message : message that needs to be displayed
+    // Param Speed : speed of the modal while being visble. 1 being the fastest and 100 being the preferable slowest.
+    // Param isDecision : flag to know whether to show a notification or a decision
+    // Param DecisionOption_1 : Option 1 of decision box. Valid only when isDecision = true
+    // Param DecisionOption_2 : Option 2 of decision box. Valid only when isDecision = true
+    let _showDecision = function(Message, Speed = 50, isDecision = false, DecisionOption_1 = null, DecisionOption_2 = null, ModalName = null){
+        if(_isModalInView())
+            _hideNotification(animate = false);
+        $objs['modalText'].html(Message);
+        speed = Speed;
+        modal_Name = ModalName;
+        if(isDecision)
+        {
+            is_Option_Mandatory = true;
+            _setDecisionOptions(DecisionOption_1, DecisionOption_2);
+            $objs['footerNotification'].hide();
+            $objs['footerDecision'].show();
+        }
+        else{
+            is_Option_Mandatory = false;
+            $objs['footerDecision'].hide();
+            $objs['footerNotification'].show();
+        }
+        $objs['outerNotificationModal'].show();
+        $objs['innerNotificationModal'].focus();
+        _toggleVerticalMoment(speed);
+    }
+
+    // Method to initialize events
+    init : {
+
+        $objs['outerNotificationModal'].on('click',function(){
+            if(!is_Option_Mandatory)
+                _hideNotification(animate = true); 
+        });
+
+        $objs['innerNotificationModal'].on('click',function(e){
+            e.stopPropagation();
+            _performModalOperations($(e.target));
+        });
+
+    };
+
+    return{
+        display_Notification : _showNotification
+        ,display_Decision : _showDecision
+        ,isModalInView : _isModalInView
+    }
+});
+
+</script>

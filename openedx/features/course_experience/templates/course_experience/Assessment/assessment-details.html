@@ -1,0 +1,578 @@
+<!--
+    Author : Naren
+    Description : Modal for adding a new assessment identifier
+    Used-in : dashboard-new.html
+-->
+<style>
+    .myModal {
+        position: fixed;
+        /* Stay in place */
+        display: none;
+        z-index: 999;
+        /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%;
+        /* Full width */
+        height: 100%;
+        /* Full height */
+        overflow: auto;
+        /* Enable scroll if needed */
+        background-color: rgba(78, 73, 73, 0.158);
+        pointer-events: bounding-box;
+        transition: all 0.3s;
+        font-family: 'Open Sans', sans-serif !important;
+    }
+
+    .innerModal {
+        border-radius: 10px;
+        position: absolute;
+        min-width: 450px;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2em;
+        background: #ffffff;
+        padding: 10px 25px 25px 25px;
+    }
+
+    .modalClose {
+        color: #656060 !important;
+        line-height: 50px !important;
+        font-size: 90% !important;
+        position: absolute;
+        right: 0;
+        text-align: center;
+        top: 0;
+        width: 70px;
+        text-decoration: none !important;
+        font-family: 'Open Sans', sans-serif !important;
+        z-index: 99999;
+    }
+
+    .modalClose:hover {
+        color: black !important;
+        font-weight: 500 !important;
+        cursor: pointer;
+    }
+
+    .modalHeading {
+        font-family: 'Open Sans', sans-serif !important;
+        font-size: 22px;
+        line-height: 50px !important;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+
+    .camera_unavailable,
+    .enviroment_unavailable {
+        color: red;
+        display: none;
+    }
+
+    .IDEloader {
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0%;
+        left: 0%;
+        display: none;
+        z-index: 1000;
+        text-align: center;
+        background-color: white;
+    }
+
+    .IDEloader .inner_loader {
+        width: 60%;
+        height: auto;
+        margin: 120px 22%;
+        position: relative;
+        box-shadow: 1px 1px 40px 5px lightgrey;
+        display: inline-block;
+        padding-bottom: 5%;
+    }
+
+    .IDEloader .progress {
+        width: 100%;
+        height: 0.75em;
+        border-radius: 1.1875rem;
+        position: absolute;
+        bottom: 0;
+    }
+
+    .IDEloader .ide_task {
+        width: 100%;
+        font-size: 14px;
+        color: gray;
+        text-align: initial;
+        padding-left: 30%;
+        margin-top: 3%;
+    }
+
+    .IDEloader .ide_task.current {
+        font-size: 16px;
+        color: #0075b4;
+    }
+
+    .IDEloader .ide_task.completed {
+        font-size: 16px;
+        color: black;
+    }
+
+    .IDEloader .ide_task .fa {
+        font-size: 12px;
+    }
+    .Basicloader{
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0%;
+        left: 0%;
+        display: none;
+        z-index: 1000;
+        text-align: center;
+        background-color: white;
+    }
+
+    .loader {
+        border: 16px solid #f3f3f3;
+        /* Light grey */
+        border-top: 16px solid #3498db;
+        /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin-left: 45%;
+        margin-top: 16%;
+        
+    }
+    .header{
+        text-align: center !important;
+        margin-top: 2%;
+        font-weight: bold;
+        margin-bottom: 5%;
+    }
+    .subtitle{
+        color: black;
+    }
+
+    .fa:hover{
+        transform: scale(1.35);
+    }
+
+    .IconRow{
+        display: none;
+        margin-top: 10%;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="Basicloader">
+    <div class="loader"> </div>
+    <span style="font-size: 14px;">Usually it will take 2-3 minutes</span>
+</div><div class="IDEloader">
+
+    <div class="inner_loader row">
+        <h1 class="header"> Setting up your virtual system</h1>
+        <h4 class="subheader text-muted "> This process usually takes more than few minutes</h4>
+
+        <div style="width: 80%;margin-left: 10%;display:contents;">
+            <div class="ide_task current row git gitlogin" data-percent="5">
+                <div class="col-md-2">
+                    <i class="fa fa-github fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Authorizing GitHub
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">
+                            Establishing connection to GitHub</span></div>
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">
+                            Please login to GitHub pop-up</span></div>
+                </div>
+            </div>
+            <div class="ide_task row git" data-percent="35">
+                <div class="col-md-2">
+                    <i class="fa fa-code-fork fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Forking the Repository
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">
+                            Forking repository to your GitHub account</span></div>
+                </div>
+            </div>
+            <div class="ide_task row" data-percent="75">
+                <div class="col-md-2">
+                    <i class="fa fa-cloud-upload fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Creating your Environment
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">Initiating the
+                            request</span></div>
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">Container
+                            creation InProgress</span></div>
+
+                </div>
+
+            </div>
+            <div class="ide_task row" data-percent="85">
+                <div class="col-md-2">
+                    <i class="fa fa-laptop fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Setting up your workspace
+                </div>
+            </div>
+            <div class="ide_task row" data-percent="100">
+                <div class="col-md-2">
+                    <i class="fa fa-cogs fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Finishing Setup...
+                </div>
+            </div>
+            <div class="IconRow">
+                <i class="fa fa-github fa-fw" style="font-size: 35px;color: #0075b4;"></i>
+                <i class="fa fa-code-fork fa-fw" style="font-size: 35px;color: #0075b4;"></i>
+                <i class="fa fa-cloud-upload fa-fw" style="font-size: 35px;color: #0075b4;"></i>
+                <i class="fa fa-laptop fa-fw" style="font-size: 35px;color: #0075b4;"></i>
+                <i class="fa fa-cogs fa-fw" style="font-size: 35px;color: #0075b4;"></i>
+                <div><button class="btn btn btn-outline-primary" style="margin-top: 10%;font-size: 21px;"
+                        onclick="Assessment_Details.openAssessementInNewWindow()">Continue to your enviroment
+                        <i class="fa fa-long-arrow-right fa-fw"></i>
+                    </button></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 5%;transition: width 1s ease-in-out;"
+                    aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <p style="margin-top: 10px;">System is creating new enviroment. Usually it will take 2 to 3 mins. Please stay with us. </p> -->
+
+</div>
+<div class="myModal" id="ExamDetailsModal">
+    <div class="innerModal">
+        <div class="modalHeader">
+            <div class="modalHeading">Special Instructions for <span id="exam_name"></span></div>
+            <a title="Close" class="modalClose">Close</a>
+        </div>
+        <div class="modalBody">
+            <ul>
+                <li class="assessment_warning full_screen">Your exam window should always be in fullscreen.</li>
+                <li class="assessment_warning popup_window">Your exam will end if you close the window.</li>
+                <li class="assessment_warning blur_not_allowed">The candidate should not move out of the window during
+                    the exam.</li>
+                <li class="assessment_warning blur_allowed">Your exam will end if you move out of the window more than
+                    <span id="blur_cnt"></span> time(s) or stayed outside for <span id="blur_dur"></span> second(s).
+                </li>
+                <li class="assessment_warning copy_paste">You won't be allowed to copy or paste any content from and
+                    within the window.</li>
+                <li class="assessment_warning camera_warning">You should provide access to the camera. If you don't have
+                    one then please contact support before proceeding.</li>
+                <li class="assessment_warning camera_warning">We will be recording from your camera while you take your
+                    exam and it will be sent to the invigilator.</li>
+                <li class="assessment_warning camera_warning">If we observe that you have moved your head or if someone
+                    else comes inside the frame, your exam won't be considered valid.</li>
+            </ul>
+        </div>
+        <div class="modalFooter">
+            <a class="btn btn-primary" style="color:white; float: right;cursor:pointer"
+                onclick="Assessment_Details.startAssessment()">
+                <span data-action-type="Continue">Continue</span>
+            </a>
+            <span class="camera_unavailable">Unable to access the camera. Please validate any other application currently accessing the camera in the background, If yes then please stop that application and try again. Also contact the support team for further assistance. </span>
+            <span class="enviroment_unavailable">Unable to create enviroment. Please contact our support team.</span>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    let Assessment_Details = new function () {
+        let _enable_camera = true, _disable_copy_paste = true,
+            _blur_count = 5, _blur_duration = 120, _url = null,
+            _exam_name = null, _pop_up_window = true, _blur_restriction = true,
+            _force_fullscreen = true, _ide_exam = 0, _enable_github_oauth,_is_token_genearated,_is_forked, tryCount = 0, retryLimit = 2, access_token = null;
+
+        let closeModal = function () {
+            $('.camera_unavailable').hide();
+            $('.enviroment_unavailable').hide();
+            $('.myModal').hide();
+        }
+
+        $('.modalClose').on('click', function () {
+            closeModal();
+        });
+
+        let _open_assessment = function () {
+            $('.camera_unavailable').hide();
+            $('.enviroment_unavailable').hide();
+            if (_enable_camera) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (mediaStream) {
+                        //if it is ide exam and token is not generated then redirect to github
+                         if (_ide_exam !== 0 ){
+                            if (_enable_github_oauth){
+                                if(!_is_token_genearated){
+                                    directToGitHub();
+                                }
+                                else if(!_is_forked){
+                                    $('.gitlogin').hide();
+                                    git_fork();
+                                }
+                                else{
+                                    $('.git').hide();
+                                    get_ide_url();
+                                }
+                            }
+                            else{
+                                $('.git').hide();
+                                get_ide_url();
+                            }
+                        }
+                        else{
+                            open_assessement_in_new_window();
+                        }
+
+                    })
+                    .catch(function (err) {
+                        $('.camera_unavailable').show();
+                    });
+            }
+            else {
+                if (_ide_exam !== 0){
+                    if (_enable_github_oauth){
+                        if(!_is_token_genearated){
+                            directToGitHub();
+                        }
+                        else if(!_is_forked){
+                            $('.gitlogin').hide();
+                            git_fork();
+                        }
+                        else{
+                            $('.git').hide();
+                            get_ide_url();
+                        }
+                    }
+                    else{
+                        $('.git').hide();
+                        get_ide_url();
+                    }
+                }
+                else{
+                    open_assessement_in_new_window();
+                }
+            }
+
+
+        }
+
+        let directToGitHub = function () {
+            show_Loading(0);
+            var git_login_tab = window.open('${oauth_login_url}' + '?client_id=' + '${client_id}' + '&redirect_uri=' + '${oauth_redirect_url}' + _ide_exam + "&scope=repo,delete_repo", 'GitHubLogin', 'width=500,height=500');
+        }
+
+        let open_assessement_in_new_window = function () {
+            hide_loading();
+            reset_virtual_sys_ready_modal();
+            if (_pop_up_window) {
+                window.open(_url, 'Discoveri-SkillAssure', 'width=' + screen.availWidth + ',height=' + screen.availHeight);
+            }
+            else {
+                window.location = _url;
+            }
+        }
+
+        let show_basic_loader = function () {
+            $('.Basicloader').show();
+        }
+
+        let show_Loading = function (index) {
+            $('.subtitle').hide(1000);
+            $('.IDEloader').show();
+            $current = $('.ide_task.current');
+            $next = $($('.ide_task')[index]);
+            if ($next.length > 0) {
+                $current.removeClass('current');
+                $('.ide_task').removeClass('completed');
+                for (i = 0; i < index; i++) { $($('.ide_task')[i]).addClass('completed') }
+                $next.addClass('current');
+                if ($next.find('.subtitle').length !== 0) {
+                    $next.find('.subtitle').show(1000);
+                }
+                $('.progress .progress-bar').css('width', $next.attr('data-percent') + '%');
+
+                if ($next.attr('data-percent') === '100') {
+                    set_virtual_sys_ready_modal();
+                }
+            };
+        };
+
+        let set_virtual_sys_ready_modal = function () {
+            $('.header').text('Virtual system is now ready');
+            $('.progress').hide();
+            $('.ide_task').hide();
+            $('.IconRow').fadeIn(1500);
+            $('.subheader').hide();
+
+        }
+
+        let reset_virtual_sys_ready_modal = function () {
+            $('.header').text('Setting up your virtual system');
+            $('.progress').show();
+            $('.ide_task').show();
+            $('.IconRow').hide();
+            $('.subheader').text('This process usually takes more than few minutes');
+            $('.subheader').show();
+        }
+        let hide_loading = function () {
+            show_Loading(0);
+            $('.IDEloader').hide();
+            $('.Basicloader').hide();
+        }
+
+        let git_fork = function (callback = get_ide_url) {
+            show_Loading(1);
+            $.ajax({
+                url: "/gitForkRepository",
+                type: 'POST',
+                data: {
+                    ide_exam_id: _ide_exam,
+                    accesstoken: access_token
+                },
+                success: function (data) {
+                    callback();
+                },
+                error: function () {
+                    hide_loading();
+                    failureModal("Failed to fork repository. Do you wish to retry?", git_fork, 1);
+                }
+            });
+        }
+
+
+        let get_ide_url = function () {
+            show_Loading(2);
+            $.ajax({
+                url: "/get_ide_url",
+                type: 'POST',
+                data: { ide_exam_id: _ide_exam },
+                success: function (data) {
+
+                        $('.subheader').text('Almost Ready');
+                        show_Loading(3);
+                        setTimeout(() => {
+                            show_Loading(4);
+                        }, 700)
+
+                    // open_assessement_in_new_window();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    tryCount++;
+                    if (tryCount <= retryLimit) {
+                        //try again // $.ajax(this); //return; 
+                        setTimeout(() => {
+                            get_ide_url();
+                        }, 20000)
+                    }
+                    else {
+                        hide_loading();
+                        failureModal("Failed to create your enviroment. Do you wish to retry?", get_ide_url,2);
+                    }
+                    return;
+                }
+            });
+
+        };
+
+        let _show_assessment_details = function (enable_camera, pop_up_window, blur_restriction, force_fullscreen, disable_copy_paste, blur_count, blur_duration, url, exam_name, ide_exam, enable_github_oauth,is_token_genearated,is_forked) {
+            _url = url;
+            _enable_camera = enable_camera;
+            _pop_up_window = pop_up_window;
+            _ide_exam = ide_exam;
+            _is_token_genearated=is_token_genearated;
+            _is_forked=is_forked;
+            _enable_github_oauth = enable_github_oauth;
+            $('#exam_name').text(exam_name);
+            $('.assessment_warning').hide();
+            if (force_fullscreen) {
+                $('.assessment_warning.full_screen').show();
+            }
+            if (pop_up_window) {
+                $('.assessment_warning.popup_window').show();
+            }
+            if (enable_camera) {
+                $('.assessment_warning.camera_warning').show();
+            }
+            if (disable_copy_paste) {
+                $('.assessment_warning.copy_paste').show();
+            }
+            if (blur_restriction) {
+                if (blur_count > 0) {
+                    $('#blur_cnt').text(blur_count);
+                    $('#blur_dur').text(blur_duration);
+                    $('.assessment_warning.blur_allowed').show();
+                }
+                else {
+                    $('.assessment_warning.blur_not_allowed').show();
+                }
+            }
+            $('.myModal').show();
+
+        };
+
+        let failureModal = function (displaymessage, callback,loadingIndex) {
+            let message = displaymessage;
+            let option2 = new Notification_Modal_Option(optionTitle = 'No', functionDelegate = function (hideModal = null) {
+                closeModal();
+                if (hideModal != null) hideModal(false);
+            });
+            let option1 = new Notification_Modal_Option(optionTitle = 'Yes', functionDelegate = function (hideModal = null) {
+                show_Loading(loadingIndex);
+                tryCount = 1;
+                callback();
+                if (hideModal != null) hideModal(false);
+            });
+            notification_manager.display_Decision(message, 1, true, option1, option2, 'OptionDialog');
+        };
+        let _launch_IDE = function(url, enable_camera, pop_up_window, ide_exam, enable_git_oauth,is_token_genearated,is_forked){
+            _url = url;
+            _enable_camera = enable_camera;
+            _pop_up_window = pop_up_window;
+            _ide_exam = ide_exam;
+            _enable_github_oauth = enable_github_oauth;
+            _is_token_genearated=is_token_genearated;
+            _is_forked=is_forked;
+            _open_assessment();
+            
+        }
+
+        init: {
+            closeModal();
+            window.startOpenAssessment = function (accesstoken) {
+                tryCount = 0;
+                access_token = accesstoken;
+                git_fork(callback = get_ide_url);
+            }
+        }
+        return {
+            showSpecialInstructions: _show_assessment_details,
+            startAssessment: _open_assessment,
+            launchWorkspace: _launch_IDE,
+            openAssessementInNewWindow: open_assessement_in_new_window
+        }
+    }
+</script>

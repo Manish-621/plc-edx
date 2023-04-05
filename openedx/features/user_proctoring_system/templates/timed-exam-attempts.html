@@ -1,0 +1,158 @@
+## mako
+<%page expression_filter="h"/>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css"
+  integrity="sha256-UK1EiopXIL+KVhfbFa8xrmAWPeBjMVdvYMYkTAEv/HI=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"
+  integrity="sha256-NXRS8qVcmZ3dOv3LziwznUHPegFhPZ1F/4inU7uC8h0=" crossorigin="anonymous"></script>
+
+<%!
+from util.date_utils import strftime_localized
+from dateutil import tz
+from django.utils.translation import ugettext as _
+
+localtz=tz.gettz('Asia/Kolkata')
+%>
+
+<%inherit file="main.html" />
+<%block name="pagetitle">${_("Results")}</%block>
+
+<style>
+html{
+	font-family: 'Open Sans',sans-serif !important;
+	font-style: unset !important;
+}
+label,th,td,a,input{
+	font-family: 'Open Sans',sans-serif !important;
+	font-style: unset !important;
+}
+.Results-Tab a.nav-link{
+	text-decoration: none;
+}
+.table{
+	border-top: none !important;
+}
+</style>
+<ul class="nav nav-tabs Results-Tab">
+	<li class="nav-item" data-section="exam_results">
+		<a class="nav-link" href="/exams/timed">Exams</a>
+	</li>
+	<li class="nav-item" data-section="exam_results">
+		<a class="nav-link active" href="#">${course_name} | ${exam['exam_name']}</a>
+	</li>
+</ul>
+<br/>
+<div class="row">
+	<div class="col-md-6">
+		<label>Search :</label>
+		<input type="text" class="edxGrid-search-box"/>
+	</div>
+</div>
+<br/>
+<table class="table table-hover table-striped student_attempts">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col">Username</th>
+			<th scope="col">E-Mail</th>
+			<th scope="col">Start</th>
+			<th scope="col">Complete</th>
+			<th scope="col">Status</th>
+			<th scope="col">Forced End</th>
+			<th scope="col">Blur Cnt</th>
+			<th scope="col">Blur Dur</th>
+			<th scope="col">Score</th>
+			<th scope="col"></th>
+		</tr>
+	</thead>
+	<tbody>
+		% if len(attempts) > 0:
+			% for attempt in attempts:
+				<tr  class="edxGrid-rows"
+				% if attempt['is_forcedEnd']:
+					style="color:red;"
+				% endif
+				>
+					<td class="filter-col" data-value="${attempt['user'].username}">${attempt['user'].username}</td>
+					<td class="filter-col" data-value="${attempt['user'].email}">${attempt['user'].email}</td>
+					<td class="filter-col" data-value="${strftime_localized(attempt['start'].astimezone(localtz),'DATE_TIME')}">${strftime_localized(attempt['start'].astimezone(localtz),'DATE_TIME')}</td>
+										
+					% if attempt['end'] is None :
+					<td class="filter-col" data-value="-">-</td>
+					% else :
+					<td class="filter-col" data-value="${strftime_localized(attempt['end'].astimezone(localtz),'DATE_TIME')}">${strftime_localized(attempt['end'].astimezone(localtz),'DATE_TIME')}</td>
+					% endif
+										
+					<td class="filter-col" data-value="${attempt['status']}">${attempt['status']}</td>
+					<td  class="filter-col" data-value="${attempt['is_forcedEnd']}"
+					% if attempt['is_forcedEnd']:
+						title="${attempt['blur_data'].get('violation_type')} Violation"
+					% endif
+					>${attempt['is_forcedEnd']}</td>
+										
+					% if attempt['blur_data']:
+					<td class="filter-col" data-value="${attempt['blur_data'].get('blur_count')}">${attempt['blur_data'].get('blur_count')}</td>
+					<td class="filter-col" data-value="${attempt['blur_data'].get('blur_duration')} sec(s)">${attempt['blur_data'].get('blur_duration')} sec(s)</td>
+					% else :
+					<td class="filter-col" data-value="-">-</td>
+					<td class="filter-col" data-value="-">-</td>
+					% endif
+										
+					<td class="filter-col" data-value="${attempt['score'].all_total.earned}/${attempt['score'].all_total.possible}">${attempt['score'].all_total.earned}/${attempt['score'].all_total.possible}</td>
+					<td>
+						<a href="/results/attempt/${attempt['id']}" class="btn btn-primary btn-xs" style="float:right;font-size: 12px;font-weight: 600;">
+							View
+						</a>
+					</td>
+				</tr>
+			% endfor
+		% else :
+				<tr>
+					<td colspan="9">
+						<center>No attempts yet</center>
+					</td>
+				</tr>
+		% endif
+	</tbody>
+</table>
+
+<script>
+let EDX_Grid = new function(){
+	let table_selector = '.student_attempts';
+    let row_count = $('table'+table_selector+' tbody tr').length;
+    let _filterGrid = function(searchTerm){
+        if(searchTerm == null || searchTerm == ''){
+            $('.edxGrid-rows').show();
+            return;
+        }
+        $('.edxGrid-rows').hide();
+        for(let i=0;i<$('table'+table_selector+' tbody tr').length;i++){
+            for(let j =0; j<$($('table'+table_selector+' tbody tr')[i]).find('td.filter-col').length;j++){
+                if($($($('table'+table_selector+' tbody tr')[i]).find('td.filter-col')[j]).attr('data-value').search(new RegExp(searchTerm,'i'))>-1){
+                    $($('table'+table_selector+' tbody tr')[i]).show();
+                    break;
+                }
+            }
+            
+        }
+    };
+
+    init :{
+        $(".edxGrid-search-box").on('keyup', function(){
+            let searchTerm = $(this).val()
+            _filterGrid(searchTerm);
+        })
+    }
+
+    return{
+        filter : _filterGrid
+    }
+}
+
+</script>

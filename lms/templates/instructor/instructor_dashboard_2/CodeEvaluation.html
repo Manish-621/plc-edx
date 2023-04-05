@@ -1,0 +1,447 @@
+## mako
+<%page expression_filter="h"/>
+<%inherit file="/main.html" />
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css"
+  integrity="sha256-UK1EiopXIL+KVhfbFa8xrmAWPeBjMVdvYMYkTAEv/HI=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"
+  integrity="sha256-NXRS8qVcmZ3dOv3LziwznUHPegFhPZ1F/4inU7uC8h0=" crossorigin="anonymous"></script>
+  <!-- <script src="/static/css/lms-course.css"></script> -->
+  <%!
+  from django.utils.translation import ugettext as _
+  import json
+  %>
+
+<%block name="pagetitle">${_("Code Evaluation")}</%block>
+<style type="text/css">
+    #editor {
+        position: relative;
+        height:100%;
+    }
+    .fullscreenbutton{
+        color: black;
+        background:rgb(200,200,200,0.5);
+        border:none;
+        border-bottom-left-radius: 5px;
+        background-image: unset;
+        font-weight: 100;
+        font-size: 14px;
+        padding:4px 10px;
+        position: absolute;;
+        top:-1px;
+        right:1px;
+        z-index:9999;
+    }
+    .code-container{
+        height:calc(100vh);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .code-header{
+        text-align: right;
+        padding:10px;
+    }
+
+    .code-body{
+        display: flex;
+        flex-direction: row;
+        flex:1;
+    }
+
+    .code-statement-con{
+        flex:1;
+        padding:5px;
+        margin-right: 10px;
+        box-shadow: 2px 2px 2px 2px #bbbbbb;
+    }
+
+    .code-editor-con{
+        flex:2;
+        display: flex;
+        flex-direction: column;
+        padding:5px;
+        box-shadow: 2px 2px 2px 2px #bbbbbb;
+    }
+
+    .code-editor-form{
+        display: flex;
+        flex-direction: row;
+        font-size: 0.8em;
+    }
+
+    .code-editor{
+        flex:1;
+    }
+    .code-title{
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .code-description{
+        font-size: 0.8em;
+    }
+
+    .my-code-editor {
+        height: 100%;
+        width:100%;
+    }
+
+    .test-case-con{
+        display: flex;
+        flex-direction: row;
+    }
+
+    .output-terminal{
+        padding:10px;
+        background: #09235f;
+        flex:1;
+        color:#ffffff;
+        font-size: 0.7em;
+    }
+    .code-footer {
+padding-left: 1%;
+    }
+    .code-testcase{
+        display: flex;
+        flex-direction: column;
+        height:150px;
+        overflow-y: scroll;
+        padding-top: 10px;
+    }
+
+    .modal-body{
+        font-size: 0.8em;
+    }
+
+    .loading{
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    form label {
+        display: inline !important;
+
+    }
+
+.form-control::-moz-placeholder {
+  color: #999;
+}
+.form-control:-ms-input-placeholder {
+  color: #999;
+}
+.form-control::-webkit-input-placeholder {
+  color: #999;
+}
+#question_position p{
+margin-bottom: 1.416em;
+font-size: 1em;
+line-height: 1.6em !important;
+color: #313131;
+font-size: 14px;
+}
+.button:hover {
+    background-color: #3277a8e8 ;
+}
+#labelstyle ,.codingquestion, .input-group-text, .spantext ,#remarks_input{
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;font-style: normal;font-weight: normal;
+}
+.result_table th{
+    text-decoration: underline;
+    padding-top: 10px;
+    padding-right: 20px;
+}
+.result_table td{
+    padding-right: 20px;
+}
+</style>
+
+<div id="htmldata" data-result="${html_data}" style="display: none;"></div>
+<div class="container " style="padding:0px !important">
+     <div class="codingquestion" style="font-size: 16px;font-weight: 600;padding-bottom: 9px;">Question : ${unit_header}</div>
+     <p class="codingquestion" id="question_position"></p>
+</div>
+<div class="container-fluid" style="padding:0px !important" >
+<div class="row">
+<div class="col-8">
+    <div style="padding-bottom: 50px;">
+        <div class="code-container">
+            <div class="code-body">
+                <div class="code-editor-con">
+                    <form class="code-editor-form mt-6" style="margin-bottom:5px">
+                        <div style="flex:1">
+                            <label id="labelstyle" style='margin-right: 5px; float:right; '>Language: ${language}</label>
+                        </div>
+                        <!-- <div data-intro="Timer" data-position="left">
+                            {{currentTime}}
+                        </div> -->
+                    </form>
+                    <div class="code-editor mt-2" data-intro="Code console" data-position="left" style="margin-bottom:1%">
+                        <div  id="editor">
+                        </div>
+                    </div>
+                    % if enable_run :
+                    <div class="code-footer">
+                        <input class="code_run_ele run_default" data-intro="Enter custom input here" data-position="left" type="text" placeholder="Input"  style="font-size: 0.8em;"/>
+                        <button id="runBtn" data-intro="Click here to Run custom inputs" data-position="left" class="code_run_ele run_default run_database btn btn-sm btn-info" style="margin-right: 5px;">
+                            <i class="fa fa-play" aria-hidden="true" style="margin-right: 5px;"></i>Run
+                        </button>
+                        <button id="previewBtn" data-intro="Click here to preview" data-position="left" class="code_run_ele run_frontend btn btn-sm btn-info" style="margin-right: 5px;">
+                            <i class="fa fa-eye" aria-hidden="true" style="margin-right: 5px;"></i>Preview
+                        </button>
+
+                    </div>
+
+                    <div class="code-testcase code_run_ele run_default run_database">
+                        <div class="output-terminal code_run_ele run_default run_database" style="white-space: pre-line" data-intro="Output terminal" data-position="left">
+                        </div>
+                    </div>
+                    % endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-4 ">
+    <!--<div  class="form-row align-items-center">
+         <div class="input-group">
+                <div class="input-group-prepend">
+                <div style="font-size:14px ;width: 14vw" >Total Score :</div>
+        </div>
+              <input type="number" style="font-size:14px ;box : none" class="form-control"  placeholder="${maxScore}" readonly >
+    </div>-->
+
+                <span class="spantext"> Total Score : ${maxScore}</span> <br>
+                <span class="spantext" style="margin-top:0px; font-size:14px">Test Cases</span>
+
+  <form id="evaluvation_par">
+
+        % if graded_eval_par :
+                % for index , testcase in enumerate(json.loads(graded_eval_par)['testcases']):
+                    % if testcase['language'] == 'all' or testcase['language'] == language :
+                        <div style="margin-top : 5px"  class="input-group-prepend input-group">
+                                <div class="input-group-prepend row">
+                                    <div style="font-size:14px ;width: 12vw" name="name11" class="input-group-text col-md-2" title="testcase id">${testcase["testcase_id"]} :</div>
+                                    <div style="font-size:14px ;width: 12vw" name="name11" class="input-group-text col-md-2" title="input">i :${testcase["input"]}</div>
+                                    <div style="font-size:14px ;width: 12vw" name="name11" class="input-group-text col-md-8" title="expected output :${testcase["output"]}">o :${testcase["output"]}</div>
+                                </div>
+                                <div class="input-group-prepend row">
+                                    <div style="font-size:14px ;width: 12vw; overflow:hidden" name="name11"  class="input-group-text col-md-2" title="status">${'passed' if testcase['passed']=='true' else 'failed'}</div>
+                                    <div style="font-size:14px ;width: 12vw; overflow:hidden" name="name11" class="input-group-text col-md-2" title="weight">wt :${testcase['weight']}</div>
+                                    <div class="input-group-text col-md-8" style="font-size:14px ;width: 12vw; overflow:hidden" name="name11" title="actual output : ${testcase["actual_output"] if 'actual_output' in testcase.keys() else testcase["error"]}">${testcase["actual_output"] if 'actual_output' in testcase.keys() else testcase["error"]}</div>
+                                </div>
+                        </div>
+                    % endif
+                % endfor
+
+        <!-- % elif evaluvation_par: -->
+                <!-- % for index , testcase in enumerate(json.loads(evaluvation_par)['testcases']): -->
+                    <!-- % if testcase['language'] == 'all' or testcase['language'] == language : -->
+                        <!-- <div style="margin-top : 5px"  class="input-group-prepend input-group">
+                                <div class="row col-md-12">
+                                    <div style="font-size:14px;" name="name11" class="input-group-text col-md-4" title="testcase id">${testcase["testcase_id"]} :</div>
+                                    <div class="input-group-text col-md-8" style="font-size:14px; overflow:hidden" name="name11">
+                                        <a style="text-decoration:underline;cursor:pointer;padding-left:60%;"onclick="run_testcase('${testcase['input']}', '${testcase['snippet_id']}')">Run Testcase</a>
+                                    </div>
+                                </div>
+                                <div class="row col-md-12">
+                                    <div style="font-size:14px;" name="name11" class="input-group-text col-md-2" title="input">i :${testcase["input"]}</div>
+                                    <div style="font-size:14px;" name="name11" class="input-group-text col-md-8" title="expected output :${testcase["output"]}">o :${testcase["output"]}</div>
+                                    <div style="font-size:14px;overflow:hidden" name="name11" class="input-group-text col-md-2" title="weight">wt :${testcase['weight']}</div>
+                                </div>
+                        </div> -->
+                    <!-- % endif -->
+                <!-- % endfor -->
+        % endif
+
+
+        <div class="form ">
+
+            <div class="input-group" style="margin-top:20px">
+              <div class="input-group-prepend">
+                <div style="font-size:14px ;font-weight:bold ; width: 12vw" class="input-group-text">Obtained Score :</div>
+              </div>
+              <input type="number" style="font-size:14px " class="form-control" id="score_input" placeholder="Score">
+            </div>
+             </div>
+              <div class="form-group pt-2">
+             <label id="labelstyle" style="font-style:normal ! important; font-size:14px" >Remarks</label>
+             <textarea style="width : 28vw ; font-size:14px"class="form-control" id="remarks_input" rows="3" >${remarks}</textarea>
+        </div>
+
+    </form>
+          <div style="float:right !important">
+            <button style="background-color: #3277a8e8 ;" id="saveResult" class="btn btn-sm btn-primary">Submit</button>
+
+          </div>
+          <div id='saved_msg' style="color: green;display: none;padding-top: 2px;">Result Saved Successfully</div>
+        </div>
+</div>
+<div id="result_id" data-result-id="${id}" style="display: none;"></div>
+</div>
+</div>
+
+<div class='outline_element' style="position: fixed;width: 100%;height: 100%;top:0;left:0;display:none;z-index: 10000;background-color: white;">
+    <button id="close-preview" class="fullscreenbutton" title="Close Preview">
+        <i class="fa fa-times" aria-hidden="true" style="margin-right: 5px;font-size: 30px;"></i>
+    </button>
+    <!-- <center style="width: 100%;position: absolute;">
+        <span style="font-size:30px;color:rgb(201,201,201);margin-top: 15%;">This is the HTML Preview Window.<br/> Click on the <i class="fa fa-times" aria-hidden="true"></i> icon to exit.</span>
+    </center> -->
+
+    <iframe id="result-Window" src="about:blank" style="width: 100%;height: 100%;"></iframe>
+</div>
+<input class="hidden result-snippet" value = "${result_snippet}"/>
+<script>
+    var url = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.js";
+	$.getScript( url, function() {
+        setTimeout(function(){
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/nord_dark");
+            editor.session.setMode("ace/mode/c");
+            editor.setReadOnly(false)
+            data='${"".join(code.splitlines())}';
+            data= $("<textarea/>").html(data).text()
+            console.log(data)
+            editor.setValue(data);
+            if ('${isgraded}')
+                $('#score_input').val('${score}')
+
+
+             // Applying code run configurations
+            var language_type= '${language_type}';
+            $('.code_run_ele').hide();
+            if('${enable_run}'){
+                $run_elements = $('.code_run_ele.run_'+language_type.toLowerCase());
+                if($run_elements.length > 0){
+                    $run_elements.show();
+                }
+                else{
+                    $('.code_run_ele.run_default').show();
+                }
+            }
+
+            $("#previewBtn").click(function(){
+                var doc = $('#result-Window')[0].contentWindow.document;
+                doc.open();
+                doc.write(editor.getValue());
+                doc.close();
+                $('.outline_element').show();
+            });
+
+            $('#close-preview').click(function(){
+                $('.outline_element').hide();
+            });
+
+
+            $("#runBtn").click(function(){
+                $(this).prop('disabled', true);
+                $('.output-terminal').empty();
+                $('.output-terminal').html("<div>Running.....<div>")
+                var str = $('.code-footer input')[0].value;
+                var input= str.replace(",", "\n");
+                let result_snippet = $('.result-snippet').val();
+                if(result_snippet == 'None' || result_snippet == 'null') result_snippet = null;
+                $.post("/run_snippet", {
+                    name: '${filename}',
+                    content: editor.getValue(),
+                    language: '${language}',
+                    stdin:input,
+                    subsection_id:'${subsection_id}',
+                    unit_id : '${unit_id}',
+                    resultSnipptet : result_snippet
+                },
+                function(data, status) {
+                    $('.result-snippet').val('${result_snippet}');
+                    var jsonRes =data;
+                    if(!data) {
+                        $('.output-terminal').html("<div>Got unexpected response<div>")
+                    }
+                    else if(jsonRes.ExamType=="DATABASE") {
+                        if(!jsonRes.stderr){
+                            try{
+                                $('.output-terminal').html('<table class="result_table" style="white-space:nowrap;">'+data.stdout+'</table>');
+                            }
+                            catch(e){
+                                $('.output-terminal').html(data.stdout);
+                            }
+                        }
+                        else
+                            $('.output-terminal').html("<div>"+jsonRes.stderr+"<div>")
+                        }
+                    else {
+                        var jsonRes=data;
+                        if(!jsonRes.stderr)
+                            $('.output-terminal').html("<div>"+jsonRes.stdout+"<div>")
+                        else
+                            $('.output-terminal').html("<div>"+jsonRes.stderr+"<div>")
+                    }
+                    $('#runBtn').prop('disabled', false);
+                })
+                .fail(function() {
+                    $('#runBtn').prop('disabled', false);
+                    $('.output-terminal').html("<div>Got unexpected response<div>");
+                });
+            });
+
+            $(".subscore").change( function() {
+                var sum = 0;
+                $(".subscore").each(function(){
+                    sum += +$(this).val();
+                });
+                $("#score_input").val(sum);
+            });
+
+
+            $('#question_position').append($('#htmldata').attr('data-result'))
+
+            $("#saveResult").click(function(){
+                $('#saveResult').prop('disabled', true);
+                //var Revaluvation_parameters =  $('#evaluvation_par').serializeArray();
+                //var newobj =[];
+                //for(var k in Revaluvation_parameters) {
+                //    var myObj = {
+                //        "parameter" : Revaluvation_parameters[k]["name"],
+                //        "score" : Revaluvation_parameters[k]["value"]
+                //        };
+                //    newobj.push(myObj);
+                //}
+
+                $.post("/courses/evaluationn/save_exam_score", {
+                    coding_exam_id : $('#result_id').attr('data-result-id'),
+                    score :$('#score_input').val() ,
+                    //evaluvation_parameters : JSON.stringify( newobj),
+                    remarks : $('#remarks_input').val(),
+                },
+                function(data, status) {
+                $('#saved_msg').css('display','block');
+                setTimeout(() => {
+                        $('#saved_msg').css('display','none');
+                    }, 3000);
+                $('#saveResult').prop('disabled', false);
+                }).fail(function() {
+                $('#saveResult').prop('disabled', false);
+                });
+            });
+        },0);
+	});
+
+    function run_testcase(input, result_snippet){
+        $('.code_run_ele.run_default').val(input);
+        $('.result-snippet').val(result_snippet);
+        $('#runBtn').click();
+    }
+</script>

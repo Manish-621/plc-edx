@@ -1,0 +1,150 @@
+<!--
+    Author : Naren
+    Description : Modal for adding a new assessment identifier
+    Used-in : dashboard-new.html
+-->
+<style>
+    .myModal{
+        position: fixed; /* Stay in place */
+        display: none;
+        z-index: 999; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(78, 73, 73, 0.158);
+        pointer-events: bounding-box;
+        transition: all 0.3s;
+        font-family: 'Open Sans',sans-serif !important;
+    }
+    .innerModal{
+        border-radius:10px;
+        position: absolute;
+        min-width: 450px;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2em;
+        background: #ffffff; 
+        padding:10px 25px 25px 25px;
+    }
+    .modalClose{
+        color: #656060 !important;
+        line-height: 50px !important;
+        font-size: 90% !important;
+        position: absolute;
+        right: 0;
+        text-align: center;
+        top: 0;
+        width: 70px;
+        text-decoration: none !important;
+        font-family: 'Open Sans',sans-serif !important;
+        z-index: 99999;
+    }
+    .modalClose:hover {
+        color: black !important;
+        font-weight: 500 !important;
+    }
+    .modalHeading{
+        font-family: 'Open Sans',sans-serif !important;
+        font-size:22px;
+        line-height: 50px !important;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+    #AIDform{
+      padding-top:10px;
+      font-size: 30% !important;
+    }
+    .elementRow{
+      width:100%;
+      margin-top: 10px;
+    }
+    #newAID{
+      height: 100%;
+      border:1px solid lightslategray;
+    }
+    .addNewAID, .innerModal label,#newAID{
+      font-family: 'Open Sans',sans-serif !important;
+      font-size:16px !important;
+      font-style: unset;
+      font-weight: 500;       
+    }
+    .addNewAID{
+        background-color: #066bd8 !important;
+        border-color: #007bff !important;
+        background-image: unset !important;
+        font-weight: 600 !important;
+    }
+</style>
+
+<div class="myModal" id="AddAIDModal">
+    <div class="innerModal">
+      <div class="modalHeader">
+        <div class="modalHeading">ENROLLMENT</div>
+        <a href="#" title="Close" class="modalClose">Close</a>
+      </div>
+      <div class="modalBody">
+        <form id="AIDform" class="" action="/dashboard/" method="post">
+          <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
+          <div class="elementRow">
+            <label>PLEASE ENTER THE ENROLLMENT ID : </label>  
+            <input name="newAID" id="newAID" style=""/></div>
+          <div class="elementRow">
+            <center>
+              <input type="button" value="Enroll" class="btn-xs addNewAID" /></div>
+            </center>
+          <input name="AIDFlag" id="AIDFlag" value="" class="hidden" />
+        </form>
+      </div>
+      <div class="modalFooter"></div>
+    </div>
+</div>
+
+
+<script>
+  $(function(){
+    function closeModal(){
+      $('.myModal').hide();
+      $('#AddAIDModal #AIDFlag').val('');
+      $('#AddAIDModal #newAID').val('');
+    }
+    $('.addAID').on('click',function(){
+      $('#AddAIDModal').show();
+      $('#AddAIDModal #AIDFlag').val('True');
+    });
+    $('.modalClose,.myModal').on('click',function(){
+      closeModal();
+    });
+    $('.innerModal').on('click',function(e){
+        e.stopPropagation();
+    });
+    $('.addNewAID').on('click', function(){
+      if($("input[name=newAID]").val() == ''){
+        closeModal();
+        notification_manager.display_Notification('Invalid Identifier'.toUpperCase(), speed = 25);
+      }
+      else{
+        $.post("/addAssessmentIdentifier",
+          {
+            AIDFlag: $("input[name=AIDFlag]").val(),	
+            newAID: $("input[name=newAID]").val(),
+          csrfmiddlewaretoken : '${ csrf_token }'
+          },
+          function(data, status){
+            closeModal();
+            if(data.is_modified){
+              notificationOption_0 = new Notification_Modal_Option(optionTitle = 'Ok', funcDelegate = function(){window.location='/dashboard'});
+              notification_manager.display_Notification(data.message.toUpperCase(), speed = 25, true,notificationOption_0);
+            }
+            else{
+              notification_manager.display_Notification(data.message.toUpperCase(), speed = 25);
+            }
+          }
+        );
+      }
+    })
+  });
+</script>

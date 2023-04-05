@@ -1,0 +1,492 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="/static/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<style>
+
+  .submit-attempt-container{
+      display : none !important;
+  }
+  .submission__answer__file__block{
+    display: none;
+  }
+  /* If save option not needed in open response assessment. */
+  .response__submission__actions{
+      display : none !important;
+  }
+  .step--staff-assessment, .step--grade{
+      display:none !important;
+  }
+  .openassessment__message>.message__content, .ora-datetime{
+    display:none;
+  }
+
+
+  /* The sidebar menu */
+  .sidebar-new {
+    min-height: 20em;
+    height: 30em; /* to fit frame*/
+    max-height: 35em;
+    width: 250px; /* 250 width - change this with JavaScript */
+    position: absolute;
+    z-index: 1;
+    top: 0;/* Stay on top */
+    left: 0;
+    background-color:#F8F8F8;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 50px; /* Place content 60px from the top */
+    transition: 0.5s; /*0.5 second transition effect to slide in the sidebar */
+    transition-timing-function: ease;
+    float:left;
+  }
+
+
+  /* The sidebar links */
+  .sidebar-new .nav-item {
+    padding: 0.25em 1em;
+    display: block;
+    transition: 0.3s;
+    transition-timing-function: ease;
+    color:#444444;
+    font-size: 14px;
+  }
+
+  /* When you mouse over the navigation links, change their color */
+  .sidebar-new .nav-item:hover {
+    background-color: #dbdbdb;
+      color: #1976d2;
+      text-shadow: 0 0 5px #fff
+  }
+
+  .active{
+    color:#0075b4 !important;
+  }
+
+  /* Position and style the close button (top right corner) */
+  .sidebar-new .closebtn {
+    position: absolute;
+    top: 0;
+    right: 0.5em;
+    font-size: 1.5em;
+    cursor: pointer;
+    color:#0075b4;
+    width:10%;
+  }
+
+  .nav-topic-head{
+    position: absolute;
+    top: 0;
+    font-size:16px;
+    padding: 0.25em 1em;
+
+  }
+
+  /* The button used to open the sidebar */
+  .openbtn {
+    cursor: pointer;
+    background-color:#0075b4;
+    color: #f8f8f8 ;
+    padding: 5px 10px;
+    border: none;
+    transition-timing-function: ease;
+    left: 1.3em !important;
+    z-index: 1;
+    background-image: none;
+  }
+
+  .openbtn:hover {
+    background-color: #0075c4 !important;
+    background-image: none !important;
+  }
+
+  .complete-mark{
+    float: right;
+    width:10%;
+  }
+
+  .main-container{
+  display: inline-block;
+  width: 100%;
+  position: relative;
+  }
+
+  .navbar-container,.menu-toggle-button{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+  }
+
+
+  .side-nav-incontent-next{
+    right: 1.2em !important;
+  }
+
+  .side-nav-incontent-previous{
+    left: 1.3em !important;
+  }
+
+
+  .side-nav-incontent-previous, .side-nav-incontent-next {
+      position: fixed;
+      top: 60% !important;
+      font-weight: bold;
+      height:3em !important;
+      min-width: 2em !important;
+  }
+
+  .main-content-body {
+    /* width: 90%;*/
+    max-width: 100%;
+    margin-top:0px;
+    margin: 0 auto;
+  }
+  .content-wrapper.main-container{
+    margin-top:0px;
+  }
+
+  .sequence-nav{
+    height: 0 !important;
+    margin: 0 !important;
+  }
+
+  .nav-bar-items-title{
+    display: block;
+    width: 97%;
+  }
+
+  .nav-bar-item-title-name,.nav-topic-head{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+
+  }
+  .nav-topic-head{
+    width: 70%;
+  }
+
+  .nav-bar-item-title-name{
+    width: 84%;
+  }
+
+
+
+  .bookmark-icon,.bookmark-icon-sr{
+    width:3%;
+  }
+
+  .unit-title{
+    color: #3277a8e8;
+    display: inline-block;
+  }
+
+  .top-nav-coding li.nav-item a .nav-bar-item-title-name{
+    text-decoration: underline;
+    color: #3277a8e8;
+    font-weight: 600;
+  }
+  .top-nav-coding li.submitted a .nav-bar-item-title-name{
+    color: white !important;
+    background-color: #55a562;
+  }
+  .top-nav-coding li.active a .nav-bar-item-title-name{
+    font-weight: 1000;
+    color: white !important;
+    background-color: #3277a8e8;
+  }
+  .top-nav-coding li.saved a .nav-bar-item-title-name{
+    /* color: white !important;
+    background-color: #eb931a; */
+
+  }
+  .top-nav-coding li a .nav-bar-item-title-name{
+    height: 25px;
+    color: black;
+    line-height: 1;
+    border-radius: 4px;
+    padding: 4px 5px;
+    width: auto;
+  }
+
+  .loader {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    /*border-top: 16px solid #3277a8e8;*/
+    border-bottom: 16px solid #3277a8e8;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    margin-left: 43%;
+    margin-top: 18%;
+    margin-bottom: 24%;
+  }
+
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .sidenav{
+    max-height:calc(100vh);
+    background-color:white;
+  }
+  .sidenav ul.sections-list{
+    max-height:calc(88vh);
+    overflow:auto;
+  }
+  .sidenav ul{
+    padding-left: 15px;
+  }
+  .sidenav li{
+      list-style-type:none;
+    }
+  .section_control{
+    cursor: pointer;
+  }
+  .sidenav .fa-chevron-right{
+    color: #0075b4;
+    font-size: 12px;
+  }
+  .sidenav .section-name, .sidenav .subsection-name, .sidenav .unit-name{
+    font-size: 14px;
+  }
+  li.current-unit {
+    padding-left: 15px;
+    margin-left: -15px;
+    background-color: rgb(0, 117, 180);
+    border-radius: 8px;
+  }
+  li.current-unit>.unit-name {
+    color:white !important;
+  }
+</style>
+<%
+course_sections = course_block_tree.get('children')
+#import ipdb; ipdb.set_trace()
+%>
+<div id="sequence_${element_id}" class="sequence" data-set="six" data-id="${item_id}"
+    data-position="${position}" data-ajax-url="${ajax_url}"
+    data-next-url="${next_url}" data-prev-url="${prev_url}"
+    data-save-position="${'true' if save_position else 'false'}"
+    data-show-completion="${'true' if show_completion else 'false'}"
+>
+  % if banner_text:
+    <div class="pattern-library-shim alert alert-information subsection-header" tabindex="-1">
+      <span class="pattern-library-shim icon alert-icon fa fa-info-circle" aria-hidden="true"></span>
+      <span class="sr">${_('Important!')}&nbsp;</span>
+      <div class="pattern-library-shim alert-message">
+        <p class="pattern-library-shim alert-copy">
+          ${banner_text}
+        </p>
+      </div>
+    </div>
+  % endif
+
+  <div class="main-container">
+    <div id="saidnav-main-content" class="row">
+      <div class="main-content-body col-md-9">
+      % if gated_content['gated']:
+        <%include file="_gated_content.html" args="prereq_url=gated_content['prereq_url'], prereq_section_name=gated_content['prereq_section_name'], gated_section_name=gated_content['gated_section_name']"/>
+      % else:
+        <div class="sr-is-focusable" tabindex="-1"></div>
+        % for idx, item in enumerate(items):
+          <div id="seq_contents_${idx}"
+            aria-labelledby="tab_${idx}"
+            aria-hidden="true"
+            class="seq_contents tex2jax_ignore asciimath2jax_ignore">
+              ${item['content']}
+          </div>
+        % endfor
+          <div id="seq_content" role="tabpanel"></div>
+      % endif
+        <div class="menu-toggle-button pull-right opensection" title="Expand Course Tree" style="display:none;">
+          <button class="btn btn-primary openbtn btn-xs">&#9776;</button>
+        </div>
+      </div>
+
+      <div class="col-md-3 sidenav-main" style="padding-right: 0px;">
+        <div class="w-20 sidenav">
+          <div class="sidenav-content">
+            <div class="row">
+              <h6 class="col-md-8" style="line-height:2;">Course Tree</h6>
+              <div class="col-md-4">
+                <div class="pull-right" title="Collapse">
+                  <a class="pull-right btn-xs btn closebtn" href="javascript:void(0)">&#9776;</a>
+                </div>
+              </div>
+            </div>
+            <ul class="mb-1 pl-3 pb-2 sections-list">
+              % for section in course_sections:
+              <li>
+                <hr/>
+                <div class="section_control">
+                  <span class="fa fa-chevron-right fa-rotate-90" aria-hidden="true"></span>
+                  <span title="${section['display_name']}" class="section-name">${section['display_name']}</span>
+                </div>
+                <ul class="nested">
+                  % for subsection in section.get('children', []):
+                  <li>
+                    <div class="section_control" style="padding-bottom: 10px;">
+                      <hr/>
+                      <span class="fa fa-chevron-right fa-rotate-90" aria-hidden="true"></span>
+                      <span title="${subsection['display_name']}" class="subsection-name">${ subsection['display_name'] }</span>
+                    </div>
+                    <ul class="nested">
+                      % for vertical in subsection.get('children', []):
+                      <li>
+                        <a title="${vertical['display_name']}" class="unit-name" id="seq_contents_${vertical['id']}" href="${vertical['lms_web_url']}">${ vertical['display_name'] }</a>
+                      </li>
+                      % endfor
+                    </ul>
+                  </li>
+                  % endfor
+                </ul>
+              </li>
+              % endfor
+            </ul>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  % if len(items) > 1 :
+  <nav class="sequence-bottom hidden" aria-label="${_('Section')}">
+    <button class="sequence-nav-button button-previous">
+      <span class="icon fa fa-chevron-prev" aria-hidden="true"></span>
+      <span>${_('Previous')}</span>
+    </button>
+    <button class="sequence-nav-button button-next">
+      <span>${_('Next')}</span>
+      <span class="icon fa fa-chevron-next" aria-hidden="true"></span>
+    </button>
+  </nav>
+  % endif
+
+</div>
+
+% if not is_staff and is_proctored:
+<style>
+  #fc_frame{
+    display:none;
+  }
+</style>
+% endif
+
+% if not is_staff and is_proctored:
+<%include file="seq_module_views/user_proctoring_scripts.html" args="exam_config=exam_config, exam_id=exam_id, proctored_data=proctored_data"/>
+% endif
+
+<%include file="seq_module_views/exam_element_management_scripts.html"/>
+<script>
+//   document.addEventListener('contextmenu', event => event.preventDefault());
+//   function setuiguuhhi(){
+//   }
+</script>
+<script>
+
+$(function(){
+    $(document.getElementById('seq_contents_'+$('#seq_content>.xblock-student_view-vertical').attr('data-usage-id'))).parent().addClass('current-unit');
+    document.getElementById('seq_contents_'+$('#seq_content>.xblock-student_view-vertical').attr('data-usage-id')).scrollIntoView({behavior: "smooth", block: "end", inline: "center"});
+document.getElementById('seq_contents_'+$('#seq_content>.xblock-student_view-vertical').attr('data-usage-id')).scrollIntoView({behavior: "smooth", block: "end", block: "center"});
+    function getCurrentUnit(){
+      return $('#mySidebar-new .nav-item.tab').filter(function(item){return $($('#mySidebar-new .nav-item.tab')[item]).attr('data-id')==$('.xblock-student_view-vertical').attr('data-usage-id');});
+    }
+
+    $('.section_control').on('click',function(){
+      $arrow = $(this).find('.fa.fa-chevron-right');
+      if($arrow.hasClass('fa-rotate-90')){
+        $arrow.removeClass('fa-rotate-90');
+        $($(this).parent().find('ul.nested')[0]).hide();
+      }
+      else{
+        $arrow.addClass('fa-rotate-90');
+        $($(this).parent().find('ul.nested')[0]).show();
+      }
+    });
+
+    if($(getCurrentUnit()).prev('.nav-item.tab').length==0){
+      $('.custom_prev').addClass('disabled');
+    }
+
+    if($(getCurrentUnit()).next('.nav-item.tab').length==0){
+      $('.custom_next').addClass('disabled');
+    }
+    $('.side-nav-incontentbuttons').on('click','.custom_prev',function(e){
+      e.stopPropagation();
+      console.log('prev');
+      if($(getCurrentUnit()).prev('.nav-item.tab').length >0)
+      {
+        try{
+          $(getCurrentUnit()).prev('.nav-item.tab').click();
+        }
+        catch(error){}
+        $('.custom_next').removeClass('disabled');
+        if($(getCurrentUnit()).prev('.nav-item.tab').length==0){
+          $('.custom_prev').addClass('disabled');
+        }
+      }
+    });
+    $('.side-nav-incontentbuttons').on('click','.custom_next',function(e){
+      e.stopPropagation();
+      console.log('next');
+      if($(getCurrentUnit()).next('.nav-item.tab').length >0)
+      {
+        try{
+          $(getCurrentUnit()).next('.nav-item.tab').click();
+        }
+        catch(error){}
+        $('.custom_prev').removeClass('disabled');
+        if($(getCurrentUnit()).next('.nav-item.tab').length==0){
+          $('.custom_next').addClass('disabled');
+        }
+      }
+    });
+
+    $('.sequence').on('keyup','input[type=text]',_.debounce(function(){
+        $(this).parent().parent().parent().parent().parent().parent().find('.submit').click();
+        $(this).focus();
+    },3000));
+
+    $('.sequence').on('change','.field-input',function(){
+        $(this).parent().parent().parent().parent().parent().parent().parent().find('.submit').click();
+    });
+
+    $('.openbtn').on('click', function(){
+      $('.opensection').hide();
+      $('.sidenav-content').show();
+      $('.main-content-body').addClass('col-md-9');
+      $('.main-content-body').removeClass('col-md-12');
+    });
+    $('.closebtn').on('click', function(){
+      $('.opensection').show();
+      $('.sidenav-content').hide();
+      $('.main-content-body').addClass('col-md-12');
+      $('.main-content-body').removeClass('col-md-9');
+    });
+});
+
+$(document).scroll(function() {
+  $(".sidenav").css({
+    "top": "0",
+    "position": $(this).scrollTop() > 252
+                && $(window).height()>$('.sidenav').height()
+                  && $('.main-content-body').height() > $(window).height() ? "sticky" : "relative"
+  });
+  $(".menu-toggle-button").css({
+    "top": "0",
+    "right": $(this).scrollTop() > 252? "25px" : "0",
+    "position": $(this).scrollTop() > 252? "fixed" : "absolute"
+  });
+
+});
+
+</script>

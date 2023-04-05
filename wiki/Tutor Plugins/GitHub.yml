@@ -1,0 +1,11 @@
+name: GitHub
+version: 0.1.0
+patches:
+  openedx-common-settings: |
+    # GitHub Oauth id LMS
+    GITHUB_CLIENT_ID = "f5fc6d589082089775b6"
+    GITHUB_CLIENT_SECRET = "d59f777ec35627b56b07105940b5e8f9263c08a8"
+    GITHUB_LOGIN_URL = "https://github.com/login/oauth/authorize"
+    GITHUB_REDIRECT_URL="https://test-discoveri.pratian.com/gitHubRedirect/"
+
+

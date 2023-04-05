@@ -1,0 +1,66 @@
+## mako
+<%page expression_filter="h"/>
+<div id="students_list">
+  <button type="button" id="back_to_question" class="btn btn-info" style="margin-bottom: 5px;">Back</button>
+  <div class="container">
+  
+      <div class="enrollment-wrapper">
+            
+            <table id="studentsTable" class="table center" style="width: 90vw;">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">User Name</th>
+                    <th scope="col">is Evaluated</th>
+                    <th scope="col">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+    
+                 % for index,student in enumerate(students):
+                  <tr>
+                    <th scope="row">${index + 1}</th>
+                    <td style="cursor: pointer;" data-id="${student.id}"><a target="_blank" href="/courses/evaluation/code/P4765765${student.id}5675674">${ student.user.username }</a></td>
+                    <td>
+                      % if student.is_graded :
+                        Yes
+                      % else :
+                        No  
+                      % endif  
+                    </td>
+                    <td>
+                        % if student.score :
+                          ${ student.score }
+                        % else :
+                          0
+                        % endif
+                      </td>
+                  </tr>
+                 % endfor                               
+                </tbody>
+            </table>
+      </div>
+    </div>  
+</div>
+
+  <style>
+    table {
+     border-collapse: separate;
+     border-spacing: 0 20px;
+     padding-left: 20px;
+   }
+  </style>    
+  <script>
+    $( document ).ready(function() {    
+    $('#header-evaluvation').html('List of Students')
+    $("#back_to_question").click(function(){
+    let userMetadata = JSON.parse(document.getElementById('user-metadata').innerHTML);
+    let course_id = userMetadata.course_id
+    $('#courses_list').css('display','block')
+    $('#header-evaluvation').html('List of Exams')
+    $('#evaldata').empty()
+
+     });
+});
+    
+  </script>

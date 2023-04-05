@@ -1,0 +1,697 @@
+## mako
+<%page expression_filter="h"/>
+<%inherit file="main.html" />
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css"
+  integrity="sha256-UK1EiopXIL+KVhfbFa8xrmAWPeBjMVdvYMYkTAEv/HI=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"
+  integrity="sha256-NXRS8qVcmZ3dOv3LziwznUHPegFhPZ1F/4inU7uC8h0=" crossorigin="anonymous"></script>
+  <%!
+  from django.utils.translation import ugettext as _
+  import json
+  import datetime
+  from django.urls import reverse
+  from datetime import datetime
+  from openedx.features.user_programs.enums import ProgramPaceChoice
+  %>
+<%block name="pagetitle">${program.program_name}</%block>
+
+<%
+program_schedule = json.loads(program.program_schedule)
+%>
+
+% if user.is_superuser :
+<div class="row">
+  <button class="pull-right" id="user-settings-button"><i class="fa fa-gear"></i> </button>
+</div>
+<div id="user-settings-block" class="row" hidden>
+  <div class="container">
+
+    <div class="form-group">
+      
+      <p>Program Identifier : ${program.identifier}</p>
+    </div>
+    <br>
+    <div class="form-group">
+      <label for="">users</label>
+      <textarea id="program-users" class="form-control"></textarea>
+      
+    </div>
+    <br>
+    <div class="form-group">
+      <label for="">Reason:</label>
+      <input type="text" id="program-reason">
+    </div>
+    <br>
+    <div>
+      
+      <button id="program-enroll">enroll</button>
+      <button id="program-unenroll">unenroll</button>
+    </div>
+    <div>
+      <span id="enrollment-success" class="status-messages" style="display:none;color:green">Enrollment/Unenrollment Success</span>
+      <span id="enrollment-error" class="status-messages" style="display:none;color:red;"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  $('#user-settings-button').off('click').on('click', function () {
+    if(!($('#user-settings-block').attr("hidden")==="hidden")){
+    $('#user-settings-block').attr("hidden", true)
+    }else{
+    $('#user-settings-block').attr("hidden", false)
+    }
+  })
+  $('#program-enroll').off('click').on('click', function () {
+    $('.status-messages').hide();
+    var data = {
+      'program_id': '${program.id}',
+      'enrollmentIdentifier': '${program.identifier}',
+      'action': 'enroll',
+      'identifiers': $('#program-users').val(),
+      'role': 'Learner',
+      'auto_enroll': true,
+      'email_students': false,
+      'reason': $('#program-reason').val()
+    }
+    $.ajax({
+      type: "POST",
+      dataType: "json",
+      url: "/programs/api/students_update_enrollment",
+      data: data,
+      success: function (msg) {
+        console.log(msg);
+        $('#enrollment-success').text('Enrollment Success!');
+        $('#enrollment-success').show();
+      },
+      error: function(msg){
+        console.log(msg);
+        $('#enrollment-error').text('Error Occured : '+msg.responseText);
+        $('#enrollment-error').show();
+      }
+    })
+    Course = "COURSE"
+    Assessment = "ASSESSMENT"
+    Project = "PROJECT"
+    Application = "APPLICATION"
+  })
+  $('#program-unenroll').off('click').on('click',function(){
+    $('.status-messages').hide();
+    var data = {
+      'program_id': '${program.id}',
+      'enrollmentIdentifier': '${program.identifier}',
+      'action': 'unenroll',
+      'identifiers': $('#program-users').val(),
+      'role': 'Learner',
+      'auto_enroll': true,
+      'email_students': false,
+      'reason': $('#program-reason').val()
+    }
+    $.ajax({
+      type: "POST",
+      dataType: "json",
+      url: "/programs/api/students_update_enrollment",
+      data: data,
+      success: function (msg) {
+        console.log(msg);
+        $('#enrollment-success').text('Unenrollment Success!');
+        $('#enrollment-success').show();
+      },
+      error: function(msg){
+        console.log(msg);
+        $('#enrollment-error').text('Error Occured : '+msg.responseText);
+        $('#enrollment-error').show();
+      }
+    })
+  })
+</script>
+
+
+% endif
+<div style='font-family:  "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;'>
+    <div class ="row main-assessment-container">
+      
+    </div>
+    <div class="program-heading row">
+    % if program.organization_logo_url and len(program.organization_logo_url):
+      <div class="program-image" style="width: 120px;">
+          <img src="${program.organization_logo_url}" onerror="this.parentNode.removeChild(this)" class="logo-image" alt="" />
+      </div>
+  % else:
+      <div class="program-image">
+      </div>
+  % endif
+      <div class="program_title">${program.program_name}</div>
+    </div>
+    <div class=" pb-0" style="margin:0px 3%;">
+       <div class="container-fluid">
+          <div class="row">
+            <div class="col-8">
+              <br/>
+              <h2 class="mb-3 pgmheading"> What you will learn</h2>
+              <ul class="PgmSmallText">
+                % for indexli ,pointer in enumerate(json.loads(program.learning_points)):
+                  % if indexli>3 :
+                    <li class="mb-2 hideli linone">${pointer['value']}</li>
+                  % else :
+                    <li class="mb-2">${pointer['value']}</li> 
+                  % endif 
+                % endfor 
+                % if len(json.loads(program.learning_points)) >4:
+                  <div style="text-align: right;"><a id="manageliData" class="seemore">See more...</a></div>      
+                % endif  
+              </ul>                         
+              <div class="collapsible program-overview">
+                <a type="button" class="btn-border btn-collapsable" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                  <span class="Pgmtext">Program Overview</span> <i class="fa fa-angle-down arrow" style="font-size: 16px !important;" aria-hidden="true"></i>
+                </a>
+                <div class="collapse" id="collapseExample">
+                  <div class="card card-body">
+                  % for item in json.loads(program.program_overview):
+                    <p style="font-size: 14px;">${item['value']}</p>
+                   % endfor
+                  </div>
+                </div>
+              </div>
+                <!-- <div class="container" style="padding-bottom: 10px;">
+                  <strong style="font-size: 1.5rem;"> in this Program</strong>
+                </div> -->
+                <div class="row" style="margin-top: 4%;">
+                  <div class="col-12" style="padding-left:2%">
+                    <div>
+                      <ul style="list-style: none; padding-left:0px;">
+                        <!-- <li class="mb-2 Pgmtext">Professional Dot Net Program</li> -->
+                        % for index1,course_section in enumerate(course_list):
+                          % if course_section['list'] and len(course_section['list'])>0:                            
+                             <li style="padding-bottom: 1%;"><div class="collapsible">
+                              <a type="button" class="btn-border btn-collapsable" data-toggle="collapse" data-target="#collapseExample${course_section['entity']}${index1}" aria-expanded="false" aria-controls="collapseExample" style="padding-right: 0px;">
+                              <div class="row" style="width:100%">
+                               <div class="col-10">
+                                <i class="fa fa-book" aria-hidden="true" style="font-size: 16px !important;"> </i> &nbsp;
+                                <span class="Pgmtext ml-2">${course_section['entity']}</span>&nbsp;
+                               </div>
+                               <div class="col-2" style="text-align: right;">
+                                <i class="arrow fa fa-angle-up" aria-hidden="true" style="font-size: 16px !important;"></i>
+                               </div>                               
+                              </div>
+                              <!-- <i class="fa fa-w-14 fa-2x fa-book" aria-hidden="true"> <span class="ml-4 Pgmtext"></span>
+                              <span class="ml-4 Pgmtext"></span></i> 
+                              <i class="arrow fa fa-angle-down" aria-hidden="true"></i> -->
+                              </a>
+                              <div class="collapse show" id="collapseExample${course_section['entity']}${index1}">
+                              <div class="card card-body">
+                              % for index,course in enumerate(course_section['list']) :  
+                                <!-- <div class="mb-3" href="/courses/${course.id}/course">${course.display_name}</div> -->
+                                <div class="mb-3">
+                                  <div><a href="/courses/${course.id}/course" style="text-decoration: none;"><span>${index+1}. &nbsp;${course.display_name}</span></a></div>
+                                  <div class="ml-3" style="font-size: 12px;color: gray;">
+                                    % if str(course.id) in program_schedule.keys():
+                                      <span class="ml-2">
+                                        Start Date : ${program_schedule[str(course.id)]['start']}
+                                      </span>
+                                      <span class="ml-2">
+                                        End Date : ${program_schedule[str(course.id)]['end']}
+                                      </span>
+                                    % else:
+                                      <span class="ml-2">
+                                        % if course.start :
+                                          Start Date : ${course.start.strftime('%d-%b-%Y')}
+                                        % else :
+                                          Start Date : Not available
+                                        % endif  
+                                      </span>
+                                      <span class="ml-2">
+                                        % if course.end :
+                                          End Date : ${course.end.strftime('%d-%b-%Y')}
+                                        % else :
+                                          End Date : Not available
+                                        % endif                                    
+                                      </span>
+                                    % endif
+                                  </div>
+                                </div>                                
+                              % endfor
+                              </div>
+
+                              </div>
+                              </div></li>                            
+                            % endif  
+                        % endfor  
+                      </ul>
+                    </div>
+                  </div>
+                </div>           
+              % if ProgramPaceChoice[program.program_pace].value == "INSTRUCTOR" :
+              <div class="container" style="padding-top: 0px;">
+                <div class="mt-0">
+                  <span>
+                    <h2 class="h2 mt-4 pgmheading">Meet your instructors</h2>
+                    <div class=" ml-0">from 
+                    <span class="providers PgmSmallText">Skill Assure Team</span>
+                    </div>
+                  </span>
+                </div>
+              </div>
+              <div class="row mb-5" style="display: flex;">
+                <div class="col-8 row ml-5">
+                  % for instructor in json.loads(program.instructors):
+                  <div class="col-6">
+                    <div style="flex-direction: row;display: flex;">
+                      <div class="instructorImg">
+                        <img src="${instructor['image']}" class=" w-100" alt="">
+                      </div>
+                      <div class="d-flex flex-column instructor-details ml-3 PgmSmallText">
+                        <a href="#" class="name font-weight-bold">${instructor['name']}</a>
+                        <div class="title">${instructor['title']}</div><div class="org">${instructor['company']}</div>
+ 
+                      </div>
+                    </div>
+                  </div>
+                  % endfor
+              </div>
+              </div>
+              % endif
+            </div>
+            <div class="col-4">
+              <div style="flex-direction: column;">
+                <div style="display: flex;margin: 20px 20px; display:none;">
+                  <div style="margin: 10px 10px 10px 10px;"><i style="width:20px;" class="fa fa-1.5x fa-book" aria-hidden="true"></i></div>
+                  <div style="margin-left: 20px">
+                   <div style="font-size: 16px;"><span><strong>Expert Instructions</strong> </span></div>
+                   <div style="font-size: 14px;"><span style="color: grey;">${courses_count} high-quality courses</span></div>
+                  </div>
+                </div>
+                <div style="display: flex;margin: 20px 20px">
+                  <div style="margin: 10px 10px 10px 10px;"><i style="width:20px;" class="fa fa-1.5x fa-user" aria-hidden="true"></i></div>
+                  <div style="margin-left: 20px">
+                    <div style="font-size: 16px;"><span><strong>${program.program_pace}-led</strong> </span></div>
+                   <div style="font-size: 14px;"><span style="color: grey;">Assignments and exams with due date</span></div>
+                  </div>
+                </div>
+                <div style="display: flex;margin: 20px 20px">
+                  <div style="margin: 10px 10px 10px 10px;"><i style="width:20px;" class="fa fa-sm fa-clock-o" aria-hidden="true"></i></div>
+                  <div style="margin-left: 20px">
+                   <div style="font-size: 16px;"><span><strong>${program.duration}</strong> </span></div>
+                   <div style="font-size: 14px;color: grey;">${program.weekly_duration}</div>
+                  </div>
+                </div>
+                
+                % if type(json.loads(program.support))== list and ('email' in json.loads(program.support)[0] or 'phone' in json.loads(program.support)[0]):
+                  <div style="display: flex;margin: 20px 20px">
+                  <div style="margin: 10px 10px 10px 10px;"><img style="width: 20px;height: 20px;" src="/static/images/TechSupport.png" alt="FAQs"></div>
+                  <div style="margin-left: 20px">
+                   <div style="font-size: 16px;"><span><strong>Support Team</strong> </span></div>
+                   % for item in json.loads(program.support):                                      
+                        <div style="font-size: 14px;"><span style="color: grey;">
+                        % if 'email' in item : 
+                          Email:<a href="">${item['email']}</a> 
+                          <br/> 
+                        % endif  
+                        % if 'phone' in item : 
+                          Ph:${item['phone']}
+                        % endif
+                        </span></div>
+                        </div>
+                   % endfor
+                  </div>
+                % endif  
+                <div style="display: flex;margin: 20px 20px;">
+                  <div style="margin: 10px 5px 10px 5px;"> 
+                    <a href="/FAQs" target="_blank" style="text-decoration: none;"><img style="width: 30px;height: 30px;" src="/static/images/faq.png" alt="FAQs"></a>
+                  </div>  
+                  <div style="margin-left: 10px;line-height: 40px;">
+                    <a href="/FAQs" target="_blank">                    
+                      <span class="ml-2" style="font-weight: bold;">FAQs</span>
+                    </a>                    
+                  </div>                
+                </div>
+
+
+               % if program_sessions:
+                   <div style="display: flex;margin: 20px 20px">
+                  
+                  <div >
+                    <span style="font-size: 18px;" ><strong>Sessions</strong> </span>
+                  <i style="width:20px; margin-left:10px" class="fa fa-1.5x fa-calendar" aria-hidden="true"></i>
+                  </div>
+                 
+                </div>
+                <hr>
+                      <div class="container-fluid">
+                           % for index,item in enumerate(program_sessions):
+                            % if index>0:
+                            <%
+                              startDate=datetime.strptime(item['startDate'], '%Y/%m/%d %H:%M')
+                              FormateDate=startDate.strftime('%d-%b-%Y')
+                              Hours=startDate.strftime('%H:%M')
+
+                              d = datetime.strptime(Hours, "%H:%M")
+                              HourswithPeriod= d.strftime("%I:%M %p")
+                              
+                              endDate=datetime.strptime(item['endDate'], '%Y/%m/%d %H:%M')
+                              EFormateDate=endDate.strftime('%d-%b-%Y')
+                              EHours=endDate.strftime('%H:%M')
+
+                              d2 = datetime.strptime(EHours, "%H:%M")
+                              EHourswithPeriod= d2.strftime("%I:%M %p")
+
+                            %>
+                     
+                            <div class="hidediv divnone" >
+                              <i style="width:20px;" class="fa fa-1.7x fa-book" aria-hidden="true"></i>
+                                <span class="sessionName">${item['sessionName']}</span> <br>
+                                
+                                 <span class="startDate"> ${FormateDate}  ${HourswithPeriod} to ${EHourswithPeriod} </span>
+                                    <div class="row"  style="display: flex ; margin-top:15px">
+                                      <div class="col-md-2">
+                                       <img  class="instructorImg" src="${item['profileImgPath']}" onerror="this.onerror=null;this.src='/static/images/user.jpeg';">
+                                   </div> 
+                                  <div class="col-md-6 ">
+                                    <span class="instructorName"> ${item['instructorName']} </span><br>
+                                    <span class="designation" > ${item['Designation']} </span>
+                                  </div> 
+                                <div class="col-md-4 align-self-center">
+                                   <a class="btn  btn-outline-primary"  style="font-size:12px ; height:28px ; width:60px" href="${item['link']}" target="_blank" role="button">JOIN </a>
+                                </div> 
+                            </div>
+                             
+                                
+                                
+
+                            </div>
+                            <br>
+                            
+                            % else :
+                              <%
+                              startDate=datetime.strptime(item['startDate'], '%Y/%m/%d %H:%M')
+                              FormateDate=startDate.strftime('%d-%b-%Y')
+                              Hours=startDate.strftime('%H:%M')
+
+                              d = datetime.strptime(Hours, "%H:%M")
+                              HourswithPeriod= d.strftime("%I:%M %p")
+                              
+                              endDate=datetime.strptime(item['endDate'], '%Y/%m/%d %H:%M')
+                              EFormateDate=endDate.strftime('%d-%b-%Y')
+                              EHours=endDate.strftime('%H:%M')
+
+                              d2 = datetime.strptime(EHours, "%H:%M")
+                              EHourswithPeriod= d2.strftime("%I:%M %p")
+
+                            %>
+                              <div>
+                                   <i style="width:20px;" class="fa fa-1.7x fa-book" aria-hidden="true"></i>
+                                      <span class="sessionName">${item['sessionName']}</span> <br>
+                                      <span class="startDate"> ${FormateDate}  ${HourswithPeriod} to ${EHourswithPeriod} </span>
+                                        <div class="row"  style="display: flex ; margin-top:15px">
+                                            <div class="col-md-2">
+                                                 <img  class="instructorImg" src="${item['profileImgPath']}" onerror="this.onerror=null;this.src='/static/images/user.jpeg';">
+                                            </div> 
+                                            <div class="col-md-6 ">
+                                                <span class="instructorName"> ${item['instructorName']} </span><br>
+                                                <span class="designation"> ${item['Designation']} </span>
+                                            </div> 
+                                             <div class="col-md-4 align-self-center">
+                                             <a class="btn  btn-outline-primary" style="font-size:12px ; height:28px ; width:60px " href="${item['link']}" target="_blank" role="button">JOIN</a>
+                                            </div> 
+                                          </div>
+                                    
+                                  
+                            
+                                </div>
+                            <br>
+                            % endif
+                            
+                          % endfor 
+                          % if len(program_sessions) >1:
+                          <div style="text-align: right;"><a id="manageDivData" class="seemore">See more...</a></div>      
+                          % endif
+                          </div>
+                   % else : 
+                     
+                   % endif     
+                
+
+                
+
+                <div style="display: flex; margin: 20ps 20px">
+                  <div class="col-md-12">
+                    <!--<p><h4></h4></p>
+                    <div class="clearfix"></div>
+                    <div class="clearfix"></div>-->
+                    <div class="col-md-12 pgmheading">
+                        <h4 style="margin-top: 1rem;
+                                        font-family: inherit !important;
+                                        font-size: 16px;                                          
+                                        font-weight: bold !important;
+                                        margin-bottom: -10px;">
+                                Instructions
+                            </h4>
+                    </div>
+                    <hr>
+                    <ul class="PgmSmallText">
+                      % for item in json.loads(program.program_instructions):
+                <li class="mb-2">${item['value']}</li>
+                % endfor 
+                    </ul>
+                    <!-- <ul>
+                        <li>Click on <b>Start Assessment</b> to start the test and ensure that you are attempting the test using the correct email ID.</li>
+                        <li>You must click <b>End My Exam</b> after you are done with the test.</li>
+                        <li><b>Once the test has started, the timer cannot be paused. You have to complete the test in one attempt.</b></li>
+                        <li>
+                            <b>The candidate may not use his or her textbook, course notes, or receive help from a proctor or any other outside source.</b>
+                        </li>
+                        <li>
+                            It is recommended that you ensure that your system meets Discoveri's compatibility requirements sent over email and check your Internet connection before starting the test.
+                        </li>
+                        <li>
+                            It is recommended that you attempt the test in an incognito or private window so that any extensions installed do not interfere with the test environment.
+                        </li>
+                        <li>
+                            We recommend that you close all other windows and tabs to ensure that there are no distractions.
+                        </li>
+                    </ul> -->
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+       </div>
+    </div>
+</div>
+
+<style>
+  .program_title{
+    font-size:1.5rem;
+    color:white;
+    text-shadow:0 0 10px rgb(8, 8, 8);
+    z-index: 1000;
+    padding-top: 25px;
+    padding-left: 5px;
+    text-transform: capitalize;
+    font-weight: 600;
+  }
+  .main-assessment-container{
+      position: relative;
+      text-align: center;
+      padding:0% 5%;
+      height : 300px;
+      background-size:cover;
+      background-image: url("${program.image_url}");
+  }
+  .btn-border {
+    /* border: 1px solid #17285d; */
+    transition: border-width 0.3s linear;
+    font-weight: 600;
+    background-color: #3277a8e8;
+    color:white !important;
+
+  }
+  .program-heading{
+    height:100px;
+    margin-top:-60px;
+    margin-left:5%;
+  }
+  .program-image{
+    width:100px;
+    border : 2px solid white;
+    border-radius:1rem;
+    overflow:hidden;
+    padding:0px;
+    box-shadow:1px 1px 1px 1px lightgray;
+  }
+  .program-image{
+  width:100px;
+  height:100px;
+  background-size:cover;
+  background-image : url("/static/skillAssureImages/discoveriD.png");
+  z-index: 100;
+  }
+  .logo-image{
+    width:116px;
+    height:100px; 
+    background-color:white ;
+}
+  /* .btn-expandedborder {
+    border-top:1px solid rgba(0,0,0,.125);
+    border-left:1px solid rgba(0,0,0,.125);
+    border-right:1px solid rgba(0,0,0,.125);
+    background-color: white;
+    color:#3277a8 !important;
+  }
+  .btn-expandedborder1 {
+    border-top:1px solid rgba(0,0,0,.125);
+    border-left:1px solid rgba(0,0,0,.125);
+    border-right:1px solid rgba(0,0,0,.125);
+    color: #17285d !important;
+    background-color: #ffffff;
+  } */
+  .btn-collapsable{
+    display: flex;
+    width: 100%;
+    /* color: #17285d !important;
+    background-color: #ffffff; */
+    justify-content: space-between;
+    padding:10px 25px 10px 10px;
+  }
+  /* .btn-border1 {
+    border: 1px solid rgba(0,0,0,.125);
+    color: #17285d !important;
+    background-color: #ffffff;
+  } */
+  .Pgmtext {
+    font-size: 16px;   
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .instructorImg {
+    position: relative;
+    overflow: hidden;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+  }
+  .flex-column {
+    flex-direction: column !important;
+}
+.d-flex {
+    display: flex !important;
+}
+.pgmheading{
+    font-size: 16px;   
+    font-weight: 600;
+    color: black;
+    font-family: inherit !important;
+}
+.bottom-left {
+  position: absolute;
+  bottom: 8px;
+  left: 16px;
+  font-weight: 609;
+}
+/* .program-overview .card{
+    border: 1px solid #17285d;
+    border-top: none;
+} */
+.program-overview .btn-expandedborder{
+  border: 1px solid #17285d;
+}
+.PgmSmallText {
+  font-size: 14px;
+}
+p , .PgmSmallText {
+  text-align: justify;
+  text-justify: inter-word;
+}
+.linone {
+  display: none;
+}
+ 
+
+#manageliData{
+  font-size: 14px; 
+  color: #0075b4;
+  cursor: pointer;
+}
+#manageliData:hover{
+color:#0075b4; text-decoration: underline; 
+}
+
+.divnone {
+  display: none;
+}
+ 
+
+#manageDivData{
+  font-size: 14px; 
+  color: #0075b4;
+  cursor: pointer;
+}
+#manageDivData:hover{
+color:#0075b4; text-decoration: underline; 
+}
+
+.sessionName{
+  margin-left:0px 20px 20px 10px;
+  font-weight:bold;
+}
+.instructorName{
+font-size: 14px;
+font-weight:bold ; 
+padding-left: 10px;
+}
+
+.designation{
+  font-size: 12px; 
+  color:gray ;
+  padding-left: 10px;
+}
+.startDate{
+  margin-top:10px;
+ font-size: 12px;
+ font-style:italian;
+ color:#0075b4;
+}
+
+.badge{
+  border :1px solid red;
+  background-color:none !import;
+  color: red;
+}
+</style>
+<script>
+
+  $('.btn-collapsable').off('click').on('click', function () {
+    $(".arrow", this).toggleClass("fa-angle-down fa-angle-up");
+    // $(this).toggleClass("btn-border btn-expandedborder");
+  })
+  $('.btn-collapsable.btn-border1').off('click').on('click', function () {
+    $(".arrow", this).toggleClass("fa-angle-down fa-angle-up");
+    // $(this).toggleClass("btn-border1 btn-expandedborder1");
+  })
+  $('#manageDivData').off('click').on('click', function () {
+    $(".hidediv").toggleClass("divnone lidisplay");
+    $(this).toggleClass("seemore seeless");
+    if($(this).hasClass('seemore'))
+    $(this).html('See more..')
+    else
+    $(this).html('See less...')
+  })  
+
+    $('#manageliData').off('click').on('click', function () {
+    $(".hideli").toggleClass("linone lidisplay");
+    $(this).toggleClass("seemore seeless");
+    if($(this).hasClass('seemore'))
+    $(this).html('See more..')
+    else
+    $(this).html('See less...')
+  })  
+</script>

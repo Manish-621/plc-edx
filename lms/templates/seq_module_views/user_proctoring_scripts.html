@@ -1,0 +1,281 @@
+<%page args="exam_config, exam_id, proctored_data" expression_filter="h"/>
+
+
+<script>
+endExam = false;
+let Proctoring_System = new function(){
+
+  const BLUR_COUNT_LIMIT = ${exam_config.blur_count}, BLUR_DURATION_LIMIT = ${exam_config.blur_duration}, ENABLE_CAMERA = ${str(exam_config.enable_camera).lower()},
+  EXAM_ID = '${exam_id}',
+  BLUR_COUNT_KEY = btoa(EXAM_ID+'BLUR_COUNT_KEY'), 
+  BLUR_DURATION_KEY = btoa(EXAM_ID+'BLUR_DURATION_KEY'); 
+
+  let _Window_Activity = {
+    % if proctored_data :
+    blur_Duration : ${proctored_data.get('blur_duration')}, 
+    blur_Count : ${proctored_data.get('blur_count')}, 
+    % else :
+    blur_Duration : 0, 
+    blur_Count : 0, 
+    % endif
+    blur_Timer : null,
+    blur_initiated : false,
+    blur_pending : false,
+    camera_stream : null,
+
+    _logBlur : function(){
+      $.post("/examviolation/1",
+        {
+          examId: EXAM_ID,
+          bC01: _Window_Activity.blur_Count,
+          bD01: _Window_Activity.blur_Duration
+        },
+        function(data, status){
+          
+        }
+      ); 
+    },
+
+    _logFocus : function(){
+      $.post("/examviolation/2",
+        {
+          examId: EXAM_ID,
+          bC01: _Window_Activity.blur_Count,
+          bD01: _Window_Activity.blur_Duration
+        },
+        function(data, status){
+
+        }
+      ); 
+    },
+
+    _endExam : function(is_cnt){
+      $.post("/examviolation/3",
+        {
+          examId: EXAM_ID,
+          bC01: _Window_Activity.blur_Count,
+          bD01: _Window_Activity.blur_Duration,
+          is_cnt: is_cnt
+        },
+        function(data, status){
+          //localStorage.removeItem(BLUR_COUNT_KEY);
+          //localStorage.removeItem(BLUR_DURATION_KEY);
+          //localStorage.removeItem(btoa(EXAM_ID));
+          window.onbeforeunload = null;
+          window.location = '/examviolation/hhfhd4446516hfh5d4156q14561n151brr1bnc16f5r1qqghljknnnnekzf';
+          //alert("Data: " + data + "\nStatus: " + status);
+        }
+      ); 
+    },
+
+    _init : function(hideNotification = null){
+
+      if(hideNotification != null)
+        hideNotification(animate=false);
+
+      % if exam_config.blur_restriction :
+      $(window).on('blur', function(){
+        console.log('timer started');
+        _Window_Activity.blur_pending = true;
+        setTimeout(() => {
+          if(_Window_Activity.blur_pending){
+            _Window_Activity.blur_initiated = true;
+            _Window_Activity.blur_Timer = setInterval(function(){
+            _Window_Activity.blur_Duration++;
+            
+            if(_Window_Activity.blur_Duration>BLUR_DURATION_LIMIT)
+                _Window_Activity._endExam(false);
+            },1000);
+
+            _Window_Activity.blur_Count++;
+            _Window_Activity._logBlur();
+
+            if(_Window_Activity.blur_Count>BLUR_COUNT_LIMIT)
+              _Window_Activity._endExam(true);
+            else {
+              _Proctoring_Notifications._windowBlurWarning();
+            }
+          }
+        }, 3000);
+      });
+
+      $(window).on('focus', function(){
+        _Window_Activity.blur_pending = false;
+        if(_Window_Activity.blur_initiated){
+          clearInterval(_Window_Activity.blur_Timer);
+          _Window_Activity._logFocus();
+          _Window_Activity.blur_initiated = false;
+          _Proctoring_Notifications._requestFullScreen();
+        }
+      });
+      % endif
+    }
+        
+  }
+
+  let _Window_Operations = {
+
+    is_camera_accessible : false,
+
+    _windowUnloadEvent : function(){
+      window.onbeforeunload = function () 
+      {          
+          if(endExam === undefined || !endExam){
+            return "Do you want to leave this page?";
+          }
+      };
+    },
+
+    // _crashIfNotPopUp : function(){
+    //   % if exam_config.pop_up_window:
+    //   if(!(window.opener && window.opener !== window && !window.menubar.visible))
+    //   {
+    //     window.location='about:crash';
+    //   }
+    //   % endif
+    // },
+
+    // _closeWindow : function(hideNotification = null){
+    //     % if exam_config.pop_up_window:
+    //         window.onbeforeunload = null;
+    //         window.opener.location.reload();
+    //         self.close();
+    //     % else:
+    //         window.onbeforeunload = null;
+    //         window.location='about:crash';
+    //     % endif
+    // },
+
+    _isFullScreen : function(){
+      return !window.screenTop && !window.screenY;
+      var st=screen.top || screen.availTop || window.screenTop;
+      if(st==window.screenY){
+        return false;
+      }
+      return (window.fullScreen==true || screen.height-document.documentElement.clientHeight<=30);
+    },
+
+    _openFullScreen : function(hideNotification = null){
+      let element = document.querySelector("html");
+      //element.requestFullscreen();
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) { /* Firefox */
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) { /* IE/Edge */
+        element.msRequestFullscreen();
+      }
+      if(hideNotification !== null)
+        hideNotification(animate = false);
+    },
+
+    _switchCamera : function(){
+      navigator.mediaDevices.getUserMedia( { video: true } )
+		  .then( function( mediaStream ) {
+        _Window_Activity._init();
+        _Window_Operations.is_camera_accessible = true;
+        _Window_Activity.camera_stream = mediaStream;
+		  })
+		  .catch( function( err ) {
+        _Proctoring_Notifications._cameraNotAccessible();
+		  });
+    },
+
+    _init : function(){
+
+      _Window_Operations._crashIfNotPopUp();
+      //_Window_Operations._windowUnloadEvent();
+
+      try{
+        window.opener.location.reload();
+      }catch(e){}  
+
+      if(ENABLE_CAMERA){
+        _Window_Operations._switchCamera();
+      }
+      else{
+        _Window_Activity._init();
+      }
+
+      $(window).on('resize', function(){
+        _Proctoring_Notifications._requestFullScreen();
+      });
+
+    }
+  
+  }
+
+  let _Proctoring_Notifications = {
+
+    _requestFullScreen : function(hideNotification = null){
+      if(hideNotification != null)
+        hideNotification(animate=false);
+      
+      % if exam_config.force_fullscreen :
+      if((!notification_manager.isModalInView() || !notification_manager.isModalInView('fullScreenRequest')) && !_Window_Operations._isFullScreen()){
+        let message = 'You need to make the window fullscreen in order to take the assessment';
+        let option1 = new Notification_Modal_Option(optionTitle = 'Ok', functionDelegate = _Window_Operations._openFullScreen);
+        let option2 = new Notification_Modal_Option(optionTitle = 'Cancel', functionDelegate = _Window_Operations._closeWindow);
+        notification_manager.display_Decision(message, 1, true, option1, option2, 'fullScreenRequest'); 
+      }
+      % endif
+      //else
+      //  alert('notification_manager.isModalInView() : '+notification_manager.isModalInView()+' || notification_manager.isModalInView("fullScreenRequest"):'+notification_manager.isModalInView("fullScreenRequest")+'|| _Window_Operations._isFullScreen():'+_Window_Operations._isFullScreen()+' || 1 >= outerHeight - innerHeight'+(1 >= outerHeight - innerHeight));
+    },
+
+    _cameraNotAccessible : function(){
+      let message = 'We are unable to access your camera. You cannot continue with the exam. Please contact our support team if you have any querries.'
+      let option = new Notification_Modal_Option(optionTitle = 'Ok', functionDelegate = _Window_Operations._closeWindow);
+      notification_manager.display_Notification(message, 1, true, option);
+    },
+
+    _endExamNotification : function(){
+      let message = 'You were out of the window for more than '+BLUR_DURATION_LIMIT+' second(s).';
+      if(_Window_Activity.blur_Count>=BLUR_COUNT_LIMIT)
+        message = 'You went out of the window too many times.'
+      message += ' <div style="color:red;font-weight:600;"><center>Your exam has been ended<center></div>'
+      let option = new Notification_Modal_Option(optionTitle = 'Ok', functionDelegate = _Window_Operations._closeWindow);
+      notification_manager.display_Notification(message, 1, true, option);
+    },
+
+    _windowBlurWarning : function(){
+      let message = 'You have moved out from the exam window. This will be reported to the exam invigilator. <br/>Your exam will end if you continue to do the same. <span style="color:red;font-weight:600;">Warnings remaining : '+(BLUR_COUNT_LIMIT-_Window_Activity.blur_Count)+'</span>';
+      let option = new Notification_Modal_Option(optionTitle = 'Ok', functionDelegate = _Proctoring_Notifications._requestFullScreen);
+      notification_manager.display_Notification(message, 1, true, option);
+    },
+
+    _init : function(){
+      
+      % if exam_config.blur_restriction :
+      if(_Window_Activity.blur_Count>0 && (_Window_Activity.blur_Count > BLUR_COUNT_LIMIT || _Window_Activity.blur_Duration>BLUR_DURATION_LIMIT))
+        window.location = '/examviolation/hhfhd4446516hfh5d4156q14561n151brr1bnc16f5r1qqghljknnnnekzf';
+      % endif
+
+      _Proctoring_Notifications._requestFullScreen();
+      //let message = "If you go out of this window more than <b>"+(BLUR_COUNT_LIMIT-_Window_Activity.blur_Count)+" time(s)</b> or for more than <b>"+(BLUR_DURATION_LIMIT-_Window_Activity.blur_Duration)+" second(s)</b>, you will be timed-out.";     
+      //if(BLUR_COUNT_LIMIT == 0)
+      //  message = "If you go out of this window or minimize it, your exam will be ended."
+      //let full_warning_info = message+"<div>We will be recording from your camera and it will be sent to exam invigilator.</div>"
+      //let option = new Notification_Modal_Option(optionTitle = 'Ok', functionDelegate = _Window_Activity._init);
+      
+      //notification_manager.display_Notification(full_warning_info, 1, true, option);
+      //}
+      //localStorage[btoa(EXAM_ID)] = btoa('STARTED');
+    }
+
+  }
+
+  _init : {
+    _Window_Operations._init();
+    _Proctoring_Notifications._init();
+    //_Window_Activity._init();
+  }
+
+  return{
+    _Window_Activity:_Window_Activity
+  }
+
+}
+</script>

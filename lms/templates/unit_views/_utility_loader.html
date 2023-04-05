@@ -1,0 +1,800 @@
+<!--
+    Author : Naren
+    Description : Modal for adding a new assessment identifier
+    Used-in : dashboard-new.html
+-->
+<style>
+    .myModal {
+        position: fixed;
+        /* Stay in place */
+        display: none;
+        z-index: 999;
+        /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%;
+        /* Full width */
+        height: 100%;
+        /* Full height */
+        overflow: auto;
+        /* Enable scroll if needed */
+        background-color: rgba(78, 73, 73, 0.158);
+        pointer-events: bounding-box;
+        transition: all 0.3s;
+        font-family: 'Open Sans', sans-serif !important;
+    }
+
+    .innerModal {
+        border-radius: 10px;
+        position: absolute;
+        min-width: 450px;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2em;
+        background: #ffffff;
+        padding: 10px 25px 25px 25px;
+    }
+
+    .modalClose {
+        color: #656060 !important;
+        line-height: 50px !important;
+        font-size: 90% !important;
+        position: absolute;
+        right: 0;
+        text-align: center;
+        top: 0;
+        width: 70px;
+        text-decoration: none !important;
+        font-family: 'Open Sans', sans-serif !important;
+        z-index: 99999;
+    }
+
+    .modalClose:hover {
+        color: black !important;
+        font-weight: 500 !important;
+        cursor: pointer;
+    }
+
+    .modalHeading {
+        font-family: 'Open Sans', sans-serif !important;
+        font-size: 22px;
+        line-height: 50px !important;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+
+    .camera_unavailable,
+    .enviroment_unavailable {
+        color: red;
+        display: none;
+    }
+
+    .IDEloader {
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0%;
+        left: 0%;
+        display: none;
+        z-index: 1000;
+        text-align: center;
+        background-color: white;
+    }
+
+    .IDEloader .inner_loader {
+        width: 60%;
+        height: auto;
+        margin: 80px 22%;
+        position: relative;
+        box-shadow: 1px 1px 40px 5px lightgrey;
+        display: inline-block;
+        padding-bottom: 3%;
+    }
+
+    .IDEloader .progress {
+        width: 100%;
+        height: 0.75em;
+        border-radius: 1.1875rem;
+        position: absolute;
+        bottom: 0;
+    }
+
+    .IDEloader .ide_task {
+        width: 100%;
+        font-size: 14px;
+        color: gray;
+        text-align: initial;
+        padding-left: 30%;
+        margin-top: 2%;
+    }
+
+    .IDEloader .ide_task.current {
+        font-size: 16px;
+        color: #0075b4;
+    }
+
+    .IDEloader .ide_task.completed {
+        font-size: 16px;
+        color: black;
+    }
+
+    .IDEloader .ide_task .fa {
+        font-size: 12px;
+    }
+    .Basicloader{
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0%;
+        left: 0%;
+        display: none;
+        z-index: 1000;
+        text-align: center;
+        background-color: white;
+    }
+
+    .loader {
+        border: 16px solid #f3f3f3;
+        /* Light grey */
+        border-top: 16px solid #3498db;
+        /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin-left: 45%;
+        margin-top: 16%;
+        
+    }
+    .header{
+        text-align: center !important;
+        margin-top: 2%;
+        font-weight: bold;
+        margin-bottom: 3%;
+    }
+    .subtitle{
+        color: black;
+    }
+
+    .IconRow .hover:hover{
+        transform: scale(1.35);
+    }
+
+    .IconRow{
+        display: none;
+        margin-top: 30px;
+    }
+    .fa-row{
+        font-size: 35px;
+        color: #0075b4;
+    }
+    .ide-procedure-gif img{
+        margin-top: 10px;
+        border: 1px solid darkgray;
+        border-radius: 10px;
+        /* height: 250px; */
+    }
+    .primary-btn, .primary-btn:hover{
+        background-color: #0075b4;
+        border: #0075b4;
+        cursor: pointer;
+    }
+    .primary-btn:active{
+        background-color: #0069d9;
+        border: #0069d9;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<!-- css for open image -->
+<style>
+    #myImg {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  #myImg:hover {opacity: 0.7;}
+  
+  /* The Modal (background) */
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100000; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    /*background-color: rgb(0,0,0);  Fallback color */
+    /* background-color: rgba(0,0,0,0.9);  Black w/ opacity */
+    background-color: rgb(0 0 0 / 21%);
+  }
+  
+  /* Modal Content (Image) */
+  .modal-content {
+    margin: auto;
+    display: block;
+    width: 68%;
+  }
+  
+  /* Caption of Modal Image (Image Text) - Same Width as the Image */
+  #caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+  }
+  
+  /* Add Animation - Zoom in the Modal */
+  .modal-content, #caption {
+    animation-name: zoom;
+    animation-duration: 0.6s;
+  }
+  
+  @keyframes zoom {
+    from {transform:scale(0)}
+    to {transform:scale(1)}
+  }
+  
+  /* The Close Button */
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+   /* color: #f1f1f1;*/
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  /* 100% Image Width on Smaller Screens */
+  @media only screen and (max-width: 700px){
+    .modal-content {
+      width: 100%;
+    }
+  }
+  </style>
+<div class="Basicloader">
+    <div class="loader"> </div>
+    <span style="font-size: 14px;">Usually it will take 2-3 minutes</span>
+</div><div class="IDEloader">
+
+    <div class="inner_loader row">
+        <h4 class="header"> Setting up your virtual system</h4>
+        <h6 class="subheader text-muted text-center "> This process usually takes more than few minutes</h6>
+
+        <div style="width: 80%;margin-left: 10%;display:contents;">
+            <div class="ide_task current row git gitlogin" data-percent="5">
+                <div class="col-md-2">
+                    <i class="fa fa-github fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Authorizing GitHub
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">
+                            Establishing connection to GitHub</span></div>
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">
+                            Please login to GitHub pop-up</span></div>
+                </div>
+            </div>
+            <div class="ide_task row git" data-percent="35">
+                <div class="col-md-2">
+                    <i class="fa fa-code-fork fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Forking the Repository
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">
+                            Forking repository to your GitHub account</span></div>
+                </div>
+            </div>
+            <div class="ide_task row" data-percent="75">
+                <div class="col-md-2">
+                    <i class="fa fa-cloud-upload fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Creating your Environment
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">Initiating the
+                            request</span></div>
+                    <div class="subtitle"><i class="fa fa-check fa-fw"></i><span style="font-size: 12px;">Container
+                            creation InProgress</span></div>
+
+                </div>
+
+            </div>
+            <div class="ide_task row" data-percent="85">
+                <div class="col-md-2">
+                    <i class="fa fa-laptop fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Setting up your workspace
+                </div>
+            </div>
+            <div class="ide_task row" data-percent="100">
+                <div class="col-md-2">
+                    <i class="fa fa-cogs fa-fw" style="font-size: 35px;"></i>
+                </div>
+                <div class="pad col-md-10">
+                    Finishing Setup...
+                </div>
+            </div>
+            <div class="IconRow">
+                <i class="fa-row hover fa fa-github fa-fw" ></i>
+                <i class="fa-row hover fa fa-code-fork fa-fw" ></i>
+                <i class="fa-row hover fa fa-cloud-upload fa-fw" ></i>
+                <i class="fa-row hover fa fa-laptop fa-fw" ></i>
+                <i class="fa-row hover fa fa-cogs fa-fw" ></i>
+                <div class="enabledgithubOauth">
+                <div class="col-md-12" style="margin-top: 25px;">
+                    <h6 class="text-center" > To initialize repository, follow the below procedure.</h6> 
+                    <code style="user-select: text; display: none;" class="text-center">
+                    </code>
+                    <i title="Copy" class="cmdcopy fa fa-copy" style="cursor: pointer;color:#0075b4;display:none"> Copy Command</i>
+                </div>
+                <div><h6 class="text-center"  style="font-style: italic;margin-top:15px"> (Run the command in IDE Terminal)</h6> </div>
+                <div>
+                    <span class="btn btn-link" style="margin-top: 3%;font-size: 17px;"
+                        onclick="Assessment_Details.cmdCopyAndOpenAssessment()"> <i  class="fa fa-copy" style="cursor: pointer;color:#0075b4"></i>  Copy Command and Continue
+                        <i class="fa fa-long-arrow-right fa-fw"></i>
+                    </span>
+                </div>
+                <div class="col-md-12 ide-procedure-gif d-flex justify-content-center">
+                    <p><b><span lang="EN-GB" style="font-size: 12.0pt; font-family: AppleSystemUIFont; mso-fareast-font-family: Calibri; mso-fareast-theme-font: minor-latin; mso-bidi-font-family: AppleSystemUIFont; color: #353535; mso-ansi-language: EN-GB; mso-fareast-language: EN-US; mso-bidi-language: AR-SA;">
+                        <img id="myImg" height="250" class="zoom" src="/static/images/GIFs/ide_old.gif" alt="" /></span></b></p>
+                      <!-- The Modal -->
+                      <div id="myModal" class="modal">
+                      
+                        <!-- The Close Button -->
+                        <span class="close">&times;</span>
+                      
+                        <!-- Modal Content (The Image) -->
+                        <img class="modal-content" id="img01">
+                      
+                        <!-- Modal Caption (Image Text) -->
+                        <div id="caption"></div>
+                      </div>
+                </div>
+            </div>
+            <div class="disabledgithubOauth" style="display: none;"><button class="btn btn btn-outline-primary" style="margin-top: 5%;font-size: 21px;"
+                onclick="Assessment_Details.openAssessementInNewWindow()">Continue to your enviroment
+                <i class="fa fa-long-arrow-right fa-fw"></i>
+            </button></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 5%;transition: width 1s ease-in-out;"
+                    aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+<div class="myModal" id="ExamDetailsModal">
+    <div class="innerModal">
+        <div class="modalHeader">
+            <div class="modalHeading">Special Instructions for <span id="exam_name"></span></div>
+            <a title="Close" class="modalClose">Close</a>
+        </div>
+        <div class="modalBody">
+            <ul>
+                <li class="assessment_warning full_screen">Your exam window should always be in fullscreen.</li>
+                <li class="assessment_warning popup_window">Your exam will end if you close the window.</li>
+                <li class="assessment_warning blur_not_allowed">The candidate should not move out of the window during
+                    the exam.</li>
+                <li class="assessment_warning blur_allowed">Your exam will end if you move out of the window more than
+                    <span id="blur_cnt"></span> time(s) or stayed outside for <span id="blur_dur"></span> second(s).
+                </li>
+                <li class="assessment_warning copy_paste">You won't be allowed to copy or paste any content from and
+                    within the window.</li>
+                <li class="assessment_warning camera_warning">You should provide access to the camera. If you don't have
+                    one then please contact support before proceeding.</li>
+                <li class="assessment_warning camera_warning">We will be recording from your camera while you take your
+                    exam and it will be sent to the invigilator.</li>
+                <li class="assessment_warning camera_warning">If we observe that you have moved your head or if someone
+                    else comes inside the frame, your exam won't be considered valid.</li>
+            </ul>
+        </div>
+        <div class="modalFooter">
+            <a class="btn btn-primary" style="color:white; float: right;cursor:pointer"
+                onclick="Assessment_Details.startAssessment()">
+                <span data-action-type="Continue">Continue</span>
+            </a>
+            <span class="camera_unavailable">Unable to access camera. Please allow us to use the camera. If you don't
+                have one, then contact our support team.</span>
+            <span class="enviroment_unavailable">Unable to create enviroment. Please contact our support team.</span>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        setTimeout(()=>{$('body').unbind('cut copy');}
+        ,5000)
+    })
+</script>
+
+<script>
+
+    let Assessment_Details = new function () {
+        let _enable_camera = true, _disable_copy_paste = true,
+            _blur_count = 5, _blur_duration = 120, _url = "${IDE['ide_url']}",
+            _exam_name = null, _pop_up_window = true, _blur_restriction = true,
+            _force_fullscreen = true, _ide_exam = 0, _enable_github_oauth,_is_token_genearated,
+            _is_forked, tryCount = 0, retryLimit = 4, access_token = null,_repository_url=null;
+
+        let closeModal = function () {
+            $('.camera_unavailable').hide();
+            $('.enviroment_unavailable').hide();
+            $('.myModal').hide();
+        }
+
+        $('.modalClose').on('click', function () {
+            closeModal();
+        });
+
+        let _open_assessment = function () {
+            $('.camera_unavailable').hide();
+            $('.enviroment_unavailable').hide();
+            if (_enable_camera) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (mediaStream) {
+                        //if it is ide exam and token is not generated then redirect to github
+                        if (_url == 'None' || _url== null) {
+                            if (_enable_github_oauth){
+                                if(!_is_token_genearated){
+                                    directToGitHub();
+                                }
+                                else if(!_is_forked){
+                                    $('.gitlogin').hide();
+                                    git_fork();
+                                }
+                                else{
+                                    $('.git').hide();
+                                    get_ide_url();
+                                }
+                            }
+                            else{
+                                $('.git').hide();
+                                get_ide_url();
+                            }
+                        }
+                        else{
+                            open_assessement_in_new_window();
+                        }
+
+                    })
+                    .catch(function (err) {
+                        $('.camera_unavailable').show();
+                    });
+            }
+            else {
+                if (_url == 'None' || _url== null){
+                    if (_enable_github_oauth){
+                        if(!_is_token_genearated){
+                            directToGitHub();
+                        }
+                        else if(!_is_forked){
+                            $('.gitlogin').hide();
+                            git_fork();
+                        }
+                        else{
+                            $('.git').hide();
+                            get_ide_url();
+                        }
+                    }
+                    else{
+                        $('.git').hide();
+                        get_ide_url();
+                    }
+                }
+                else{
+                    open_assessement_in_new_window();
+                }
+            }
+
+
+        }
+
+        let directToGitHub = function () {
+            show_Loading(0);
+            var git_login_tab = window.open('${IDE['oauth_login_url']}' + '?client_id=' + '${IDE['client_id']}' + '&redirect_uri=' + '${IDE['oauth_redirect_url']}' +  '${IDE['ide_exam_id']}' + "&scope=repo", 'GitHubLogin', 'width=500,height=500');
+        }
+
+        let cmdcopy_and_openAssessment = function(){
+            $('body').unbind('cut copy');
+            commandCopy(open_assessement_in_new_window);
+        }
+
+        let commandCopy = function(callback=null){
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val($('.IconRow').find('code').text()).select();
+            document.execCommand("copy");
+            $temp.remove();
+            callback();
+        }
+
+        let open_assessement_in_new_window = function () {
+            hide_loading();
+            reset_virtual_sys_ready_modal();
+            if (_pop_up_window) {
+                window.open(_url, '_blank');
+            }
+            else {
+                window.location = _url;
+            }
+        }
+
+        let show_basic_loader = function () {
+            $('.Basicloader').show();
+        }
+
+        let show_Loading = function (index) {
+            $('.subtitle').hide(1000);
+            $('.IDEloader').show();
+            $current = $('.ide_task.current');
+            $next = $($('.ide_task')[index]);
+            if ($next.length > 0) {
+                $current.removeClass('current');
+                $('.ide_task').removeClass('completed');
+                for (i = 0; i < index; i++) { $($('.ide_task')[i]).addClass('completed') }
+                $next.addClass('current');
+                if ($next.find('.subtitle').length !== 0) {
+                    $next.find('.subtitle').show(1000);
+                }
+                $('.progress .progress-bar').css('width', $next.attr('data-percent') + '%');
+
+                if ($next.attr('data-percent') === '100') {
+                    set_virtual_sys_ready_modal();
+                }
+            };
+        };
+
+        let set_virtual_sys_ready_modal = function () {
+            $('.header').text('Virtual system is now ready');
+            $('.progress').hide();
+            $('.ide_task').hide();
+            $('.IconRow').fadeIn(1500);
+            $('.IconRow').find('code').text('initialize '+_repository_url+' '+ '${IDE['username']}'+' '+ '${IDE['email']}');
+            $('.subheader').hide();
+
+        }
+
+        let reset_virtual_sys_ready_modal = function () {
+            $('.header').text('Setting up your virtual system');
+            $('.progress').show();
+            $('.ide_task').show();
+            $('.IconRow').hide();
+            $('.subheader').text('This process usually takes more than few minutes');
+            $('.subheader').show();
+        }
+        let hide_loading = function () {
+            show_Loading(0);
+            $('.IDEloader').hide();
+            $('.Basicloader').hide();
+        }
+
+        let git_fork = function (callback = get_ide_url) {
+            show_Loading(1);
+            $.ajax({
+                url: "/gitForkRepository",
+                type: 'POST',
+                data: {
+                    ide_exam_id: _ide_exam,
+                    accesstoken: access_token
+                },
+                success: function (data) {
+                    callback();
+                },
+                error: function () {
+                    hide_loading();
+                    failureModal("Failed to fork repository. Do you wish to retry?", git_fork, 1);
+                }
+            });
+        }
+
+
+        let get_ide_url = function () {
+            show_Loading(2);
+            $.ajax({
+                url: "/get_ide_url",
+                type: 'POST',
+                data: { ide_exam_id: _ide_exam },
+                success: function (data) {
+                        _url=data['container_url'];
+                        _repository_url= data['repository_url'];
+                        $('.subheader').text('Almost Ready');
+                        show_Loading(3);
+                        setTimeout(() => {
+                            show_Loading(4);
+                        }, 700)
+                    // open_assessement_in_new_window();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    tryCount++;
+                    if (tryCount <= retryLimit) {
+                        //try again // $.ajax(this); //return; 
+                        setTimeout(() => {
+                            get_ide_url();
+                        }, 30000)
+                    }
+                    else {
+                        hide_loading();
+                        failureModal("Failed to create your enviroment. Do you wish to retry?", get_ide_url,2);
+                    }
+                    return;
+                }
+            });
+
+        };
+
+        let _show_assessment_details = function (enable_camera, pop_up_window, blur_restriction, force_fullscreen, disable_copy_paste, blur_count, blur_duration, url, exam_name, ide_exam, enable_github_oauth,is_token_genearated,is_forked) {
+            _url = url;
+            _enable_camera = enable_camera;
+            _pop_up_window = pop_up_window;
+            _ide_exam = ide_exam;
+            _is_token_genearated=is_token_genearated;
+            _is_forked=is_forked;
+            _enable_github_oauth = enable_github_oauth;
+            $('#exam_name').text(exam_name);
+            $('.assessment_warning').hide();
+            if (force_fullscreen) {
+                $('.assessment_warning.full_screen').show();
+            }
+            if (pop_up_window) {
+                $('.assessment_warning.popup_window').show();
+            }
+            if (enable_camera) {
+                $('.assessment_warning.camera_warning').show();
+            }
+            if (disable_copy_paste) {
+                $('.assessment_warning.copy_paste').show();
+            }
+            if (blur_restriction) {
+                if (blur_count > 0) {
+                    $('#blur_cnt').text(blur_count);
+                    $('#blur_dur').text(blur_duration);
+                    $('.assessment_warning.blur_allowed').show();
+                }
+                else {
+                    $('.assessment_warning.blur_not_allowed').show();
+                }
+            }
+            $('.myModal').show();
+
+        };
+
+        let failureModal = function (displaymessage, callback,loadingIndex) {
+            let message = displaymessage;
+            let option2 = new Notification_Modal_Option(optionTitle = 'No', functionDelegate = function (hideModal = null) {
+                closeModal();
+                if (hideModal != null) hideModal(false);
+            });
+            let option1 = new Notification_Modal_Option(optionTitle = 'Yes', functionDelegate = function (hideModal = null) {
+                show_Loading(loadingIndex);
+                tryCount = 1;
+                callback();
+                if (hideModal != null) hideModal(false);
+            });
+            notification_manager.display_Decision(message, 1, true, option1, option2, 'OptionDialog');
+        };
+        let _launch_IDE = function( enable_camera, pop_up_window, ide_exam, enable_git_oauth,is_token_genearated,is_forked){
+            _enable_camera = enable_camera;
+            _pop_up_window = pop_up_window;
+            _ide_exam = ide_exam;
+            _enable_github_oauth = enable_git_oauth;
+            _is_token_genearated=is_token_genearated;
+            _is_forked=is_forked;
+            _open_assessment();
+            if (!enable_git_oauth){
+                $('.disabledgithubOauth').show();
+                $('.enabledgithubOauth').hide();
+            }
+            
+        }
+        let _stop_workspace = function(){
+            $('.spinner').show();
+            $.ajax({
+                url: "/delete_container",
+                type: 'POST',
+                data: {
+                    container_group: '${IDE['container_grp']}',
+                    ide_exam_id : '${IDE['ide_exam_id']}'
+                },
+                success: function (data) {
+                    $('.container_del').show();
+                    $('.stop_workspace').addClass('disabled');
+                    $('.spinner').hide();
+                    _url= null;
+                },
+                error: function () {
+                    $('.spinner').hide();
+                }
+            })
+        }
+
+
+    $('.cmdcopy').on('click', function(){
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($($('.cmdcopy').prev()).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+
+        /*$('.cmdcopy').text(' Copied!');
+        $('.cmdcopy').css('color','green')
+
+
+        setTimeout(()=>{
+            $('.cmdcopy').text(' Copy Command')
+            $('.cmdcopy').css('color','#0075b4')
+        },1200); */
+        
+      });
+
+        init: {
+            closeModal();
+            window.startOpenAssessment = function (accesstoken) {
+                tryCount = 0;
+                access_token = accesstoken;
+                git_fork(callback = get_ide_url);
+            }
+        }
+        return {
+            showSpecialInstructions: _show_assessment_details,
+            startAssessment: _open_assessment,
+            launchWorkspace: _launch_IDE,
+            stopWorkspace :_stop_workspace,
+            openAssessementInNewWindow: open_assessement_in_new_window,
+            cmdCopyAndOpenAssessment : cmdcopy_and_openAssessment
+        }
+    }
+</script>
+
+<!-- script for open image -->
+<script>
+    // Get the modal
+  var modal = document.getElementById("myModal");
+  
+  // Get the image and insert it inside the modal - use its "alt" text as a caption
+  var img = document.getElementById("myImg");
+  var modalImg = document.getElementById("img01");
+  var captionText = document.getElementById("caption");
+  img.onclick = function(){
+    modal.style.display = "block";
+    modalImg.src = this.src;
+    captionText.innerHTML = this.alt;
+  }
+  
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+  
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+</script>

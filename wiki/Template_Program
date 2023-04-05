@@ -1,0 +1,19 @@
+JSON_Template for Learning points
+[
+    {
+        "value":"<pointer_content>"
+    },
+    {
+        "value":"<pointer_content>"
+    }
+]
+
+JSON_Template for Instructors
+[
+    {
+        "name":"<instructor_name>",
+        "title":"<instructor_title>",
+        "company":"<instructor_company>",
+        "image":"<instructor_image_url>"
+    }
+]

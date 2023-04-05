@@ -1,0 +1,143 @@
+<style>
+.exam-timer span, .exam-timer .nav-bar-item-title-name{
+    font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+.exam-timer{
+    border-left:4px !important;
+    border-bottom:2px solid #0075b4;
+}
+.exam-timer.low-time{
+    border-left:4px !important;
+    border-bottom:2px solid red;
+}
+.proctored_exam_status.is-fixed{
+    margin-left:-20px;
+}
+.proctored_exam_status .exam-timer.low-time{
+    border-left:4px solid red;
+}
+.proctored_exam_status .exam-timer.low-time .exam-text{
+    color:black;
+    font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+.proctored_exam_status .exam-timer.low-time #endExam,.proctored_exam_status .exam-timer.low-time #toggle_timer{
+    background-color: #0d4e6c !important;
+    color: #fff !important;
+    font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+.proctored_exam_status .exam-timer.low-time #time_remaining_id b{
+    color:red;
+}
+.proctored_exam_status .exam-timer.low-time .exam-timer-clock {
+    display: inline-block;
+    padding: 0 0 0 6.66667px;
+    background-color: #e7e7e7;
+    border-radius: 3px;
+}
+#endExam {
+   margin-right: 20px ;
+    border: 0 ;
+    background-image: none ;
+    padding: 4px 15px ;
+    box-shadow: none ;
+    text-shadow: none ;
+    background-color: #0d4e6c ;
+    color: #fff ;
+}
+.row{
+    display:flex;
+    flex-wrap: wrap;
+}
+.col-lg-5,.col-md-5{
+    width:41.67% !important;
+}
+.col-lg-4,.col-md-4{
+    width:33.33%;
+}
+.col-lg-3,.col-md-3{
+    width:25%;
+}
+
+</style>
+<div class="exam-timer row" style="padding:5px 0px;background-color:white;">
+    <%
+        function gtLtEscape(str) {
+            return String(str)
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+        }
+    %>
+    <div class='exam-text col-lg-5'>
+        <span class="nav-item nav-item-section" style="font-size:18px;line-height:2;">
+            <%= interpolate_text('{exam_link}', {exam_link: gtLtEscape(exam_display_name)}) %>
+            <!--<a href="${course_url}#${unicode(section.location)}">${section.display_name_with_default}</a>-->
+        </span>
+        <span style="display:none;">
+            <%= interpolate_text('{exam_link}',{exam_link: "<a class='header_timer_location'>"+exam_url_path+"</a>"}) %>
+        </span>
+        <!-- <% // xss-lint: disable=underscore-not-escaped %>
+        <%= interpolate_text('You are taking "{exam_link}" as a {exam_type} exam. The timer on the right shows the time remaining in the exam.', {exam_link: "<a href='" + exam_url_path + "'>"+gtLtEscape(exam_display_name)+"</a>", exam_type: (!_.isUndefined(arguments[0].exam_type)) ? exam_type : gettext('timed')}) %>
+        <%- gettext('To receive credit for problems, you must select "Submit" for each problem before you select "End My Exam".') %> -->
+    </div>
+    <div id="input_pages" class="col-lg-4" style="height:40px;">
+
+    </div>
+    <div id="turn_in_exam_id" class="pull-right turn_in_exam col-lg-3" style="margin:unset;padding:5px 0px;">
+        <span class="pull-right">
+            <% if(attempt_status !== 'ready_to_submit') {%>
+                <button class="clone btn btn-pl-primary btn-primary" id="endExam">
+                    <%- gettext("End Exam") %>
+                </button>
+                <button class="exam-button-turn-in-exam btn btn-pl-primary btn-primary hidden" id="endExam1">
+                    <%- gettext("End Exam") %>
+                </button>
+            <% } %>
+        </span>
+        <span class="sr timer-announce" aria-live="assertive"></span>
+        <span class="exam-timer-clock pull-right" style="margin-right:25px;">
+            <button role="button" id="toggle_timer" class="btn btn-primary" aria-label="<%- gettext("Hide Timer") %>" aria-pressed="false">
+                <i class="fa fa-eye-slash" aria-hidden="true"></i>
+            </button>
+            <span id="time_remaining_id">
+                <b>
+                </b>
+            </span>
+        </span>
+    </div>
+</div>
+<script>
+$(function(){
+    if($('.header_timer_location').text().indexOf($('.xblock.xblock-student_view.xblock-student_view-sequential').attr('data-usage-id'))==-1){
+        $('.exam-timer').hide();
+    }
+    else{
+        //$('.has-breadcrumbs').parent().parent().parent().hide();
+    }
+    try{
+        setuiguuhhi();
+    }
+    catch(e){
+        console.log('setuiguuhhi not found');
+    }
+})
+$("#endExam").on('click',function(e){
+    e.stopPropagation();
+    window.onbeforeunload = null;
+    endExam = true;
+    try {
+        if (Code_Editor){
+
+            Code_Editor.warnIfUnsaved(()=>{
+                $('#endExam1').click();
+            });
+        }
+        else{
+            $('#endExam1').click();
+        }
+    }
+    catch(e) {
+        $('#endExam1').click();
+    }
+})
+
+</script>

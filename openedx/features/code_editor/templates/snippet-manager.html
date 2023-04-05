@@ -1,0 +1,678 @@
+## mako
+<%inherit file="main.html" />
+
+<%!
+import json
+%>
+
+<%block name="pagetitle">Snippet Manager</%block>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<style type="text/css">
+
+    #editor {
+        position: relative;
+        height:100%;
+        border: #bbaa solid 1px;
+
+    }
+    .code-container{
+        height:calc(100vh);
+        display: flex;
+        flex-direction: column;
+        /*margin-top: -2em;*/
+        width:100%;
+        padding-bottom: 20px;
+    }
+
+    .code-header{
+        text-align: right;
+        padding:10px;
+    }
+
+    .code-body{
+        display: flex;
+        flex-direction: row;
+        flex:1;
+    }
+    .code-statement-con{
+        flex:1;
+        padding:5px;
+        margin-right: 10px;
+        box-shadow: 2px 2px 2px 2px #bbbbbb;
+    }
+
+    .code-editor-con{
+        flex:2;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        background-color: white;
+        padding: 0.2%;
+        box-shadow: 2px -2px 6px lightgrey;
+    }
+
+    .code-editor-form{
+        display: flex;
+        flex-direction: row;
+        font-size: 0.8em;
+    }
+
+    .code-editor{
+        flex:1;
+    }
+    .code-title{
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .code-description{
+        font-size: 0.8em;
+    }
+
+    .my-code-editor {
+        height: 100%;
+        width:100%;
+    }
+
+    .test-case-con{
+        display: flex;
+        flex-direction: row;
+    }
+
+    .output-terminal{
+        padding:10px;
+        background: black;
+        flex:1;
+        color:#ffffff;
+        font-size: 0.7em;
+        width: 100%;
+        overflow-x: auto;
+        transition: max-height 0.15s ease-out;
+    }
+    .code-footer {
+        padding-left: 1%;
+    }
+    .code-testcase{
+        display: flex;
+        flex-direction: column;
+        height:150px;
+        padding-top: 0px;
+        width:100%;
+        padding: 0px 7px 7px;
+        background-color: rgba(180, 180, 180, 0.8);
+    }
+
+    .modal-body{
+        font-size: 0.8em;
+    }
+
+    .loading{
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    form label {
+        display: inline !important;
+    }
+    .btn {
+    border: 1px solid #d2c9c9;
+	border-radius: 3px;
+	box-shadow: inset 0 1px 0 0 #fff;
+	color: #333;
+	display: inline-block;
+	font-size: inherit;
+	font-weight: bold;
+	background-color: #f1f1f1;
+	background-image: -webkit-linear-gradient(#f1f1f1,#d9d1d1);
+	background-image: linear-gradient(#f1f1f1,#d9d1d1);
+	padding: 7px 18px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 #fcfbfb;
+	background-clip: padding-box;
+	font-size: 0.8125em;
+
+    }
+    .btn:hover {
+    border: 1px solid #d2c9c9;
+	border-radius: 3px;
+	box-shadow: inset 0 1px 0 0 #fff;
+	color: #333;
+    }
+
+    .code-editor-form label{
+        color: #3277a8e8;
+        font-weight: bold;
+    }
+
+    .scrolbar::-webkit-scrollbar {
+        width: 6px;
+        height: 55px;
+        border-radius: 10%;
+      }
+
+      /* Track */
+      .scrolbar::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        border-radius: 10px;
+        background-color: #F5F5F5;
+      }
+
+      /* Handle */
+      .scrolbar::-webkit-scrollbar-thumb {
+        background:#3277a8e8;
+        border-radius: 10px;
+      }
+
+      /* Handle on hover */
+      .scrolbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+
+      .editorLable:focus{
+        outline: 0;
+        box-shadow: 0 0 5px blue;
+      }
+
+      .xblock p{
+        color: #444;
+        font-size: 14px !important;
+      }
+      .editorLable{
+        margin-right: 10px;
+        background-color:snow ;
+        border-color: #3277a8e8 ;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        padding: 4px;
+      }
+      .result_table th{
+          text-decoration: underline;
+          padding-top: 10px;
+          padding-right: 20px;
+      }
+      .result_table td{
+          padding-right: 20px;
+      }
+      .devops_hint{
+          display:none;
+      }
+      .devops_answer{
+          display: none;
+      }
+    .btn-gradient{
+        background-image: none;
+        background-color: rgba(180, 180, 180, 0.8);
+        font-size: 14px;
+        height: 22px;
+        padding: 0px 10px;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 5px;
+        border-radius: 5px 5px 0px 0px;
+    }
+    .btn-gradient :active{
+        margin:0.1px 1px;
+    }
+    #hide-show-icon{
+        font-size: 20px;
+    }
+    #snippetid{
+        user-select: text;
+        font-weight: bold;
+        padding: 6px 15px;
+        border: 1px solid darkgray;
+        margin-left: 5px;
+        cursor: text;
+    }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div>
+    <div class="code-container">
+        <div class="code-body">
+            <div class="code-editor-con">
+                <form class="code-editor-form mt-6">
+                    <div class="form-group col-md-12 row" style="margin-bottom: 5px;">
+                        <div class="col-md-3">
+                            <label style="margin-right: 5px;font-size: 14px;">Language Type: </label>
+                            <select id="languageTypeChange" class="editorLable" name="language" style="width:8Vw ;">
+                                    <option style="" value ="BACKEND">Back End</option>
+                                    <option style="" value ="DATABASE">Database</option>
+                                    <option style="" value ="DEVOPS">DevOps</option>
+                                    <option style="" value ="FRONTEND">Front End</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label style="margin-right: 5px;font-size: 14px;">Language: </label>
+                            <select id="languageChange" class="editorLable" name="language" style="width:8Vw ;">
+                                    <!-- <option style=" color:#3277a8e8;" value =""></option>              -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label style="margin-right: 5px;font-size: 14px;">Editor Theme: </label>
+                            <select id="themeChange" class="editorLable" name="editorTheme" style="width:8Vw;">
+                                <option value ="monokai">Dark Mode</option>
+                                <option value ="sqlserver">Light Mode</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label style="margin-right: 5px;font-size: 14px;">Font Size: </label>
+                            <select id="fontChange" class="editorLable" name="editorTheme" style="width:8Vw;">
+                                <option value ="12">Small</option>
+                                <option selected value ="14">Medium</option>
+                                <option value ="18">Large</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- <div data-intro="Timer" data-position="left">
+                        {{currentTime}}
+                    </div> -->
+                </form>
+
+
+                <div class="code-editor" data-intro="Code console" data-position="left" style="margin-bottom:10px;position:relative;">
+                    <div  id="editor">
+                    </div>
+                </div>
+                <div class="code-footer">
+                    <input class="code_run_ele run_default" data-intro="Enter custom input here" data-position="left" type="text" placeholder="Input"  style="font-size: 0.8em;"/>
+
+                    <button id="runBtn" data-intro="Click here to Run custom inputs" data-position="left" class="code_run_ele run_default run_database btn btn-sm btn-info" style="margin-right: 5px;">
+                        <i class="fa fa-play" aria-hidden="true" style="margin-right: 5px;"></i>Run
+                    </button>
+
+                    <button id="previewBtn" data-intro="Click here to preview" data-position="left" class="code_run_ele run_frontend btn btn-sm btn-info" style="margin-right: 5px;">
+                        <i class="fa fa-eye" aria-hidden="true" style="margin-right: 5px;"></i>Preview
+                    </button>
+
+                    <button id="saveBtn" style="float:right;margin-right:10px;margin-left:50px;color: #fff; background-color: #28a745; border-color: #28a745; box-shadow: inset 0 1px 0 0 #28a745; background-image: unset; font-weight: 400;" data-disable-interaction="true" data-position="left" data-position="left" data-intro="Click here to submit the code" title="Once submitted, you cannot change." class="btn btn-sm btn-success">Save</button>
+
+                    <button id="updateBtn" style="float:right;margin-left:50px;color: #fff; background-color:#eb931a; border-color: #eb931a; box-shadow: inset 0 1px 0 0 #eb931a; background-image: unset; font-weight: 400;" data-disable-interaction="true" data-position="left" data-position="left" data-intro="Click here to save the code" " class="btn btn-sm btn-primary">Update</button>
+
+                    <button id="getBtn" data-intro="Click here to Run custom inputs" data-position="left" class="btn btn-sm btn-primary" style="float:right;margin-left:20px; color: #fff; background-color:#0175B4; border-color: #0175B4; box-shadow: inset 0 1px 0 0 #0175B4; background-image: unset; font-weight: 400;">Get Code
+                    </button>
+
+                    <input class="snippet_id" data-intro="Enter custom input here" data-position="left" type="text" placeholder="Snippet ID"  style="font-size: 0.8em;float: right;"/>
+
+                    <span>Snippet ID : <span id="snippetid"></span></span>
+
+                    <span id="savingMsg" style="margin-left:2%;display: none;color: darkgray;">Saving....</span>
+                    <span id="savedMsg"  style="margin-left:2%; display: none;color:#28a745">Code Saved successfully..</span>
+                    <span id="submittingMsg" style="margin-left:2%;display: none;color: darkgray;">Updating....</span>
+                    <span id="submittedMsg"  style="margin-left:2%; display: none;color:#eb931a">Code Updated successfully..</span>
+                </div>
+                <div id="toggleTerminal" class="code_run_ele run_default run_database btn-gradient">
+                    <span>Output Window</span>
+                    <i class="fa fa-angle-down" id="hide-show-icon" aria-hidden="true"></i>
+                </div>
+                <div class="code-testcase code_run_ele run_default run_database">
+                    <div class="output-terminal code_run_ele run_default run_database" style="white-space: pre-line" data-intro="Output terminal" data-position="left">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class='outline_element' style="position: fixed;width: 100%;height: 100%;top:0;left:0;display:none;z-index: 1000000;background-color: white;">
+    <button id="close-preview" class="fullscreenbutton" title="Close Preview">
+        <i class="fa fa-times" aria-hidden="true" style="margin-right: 5px;font-size: 16px;font-weight: 400;"></i>
+    </button>
+    <!-- <center style="width: 100%;position: absolute;">
+        <span style="font-size:30px;color:rgb(201,201,201);margin-top: 15%;">This is the HTML Preview Window.<br/> Click on the <i class="fa fa-times" aria-hidden="true"></i> icon to exit.</span>
+    </center> -->
+
+    <iframe id="result-Window" src="about:blank" style="width: 100%;height: 100%;"></iframe>
+</div>
+
+<script>
+    let Code_Editor = new function(){
+        const ACE_URL1 = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.js",
+            ACE_URL2 = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ext-language_tools.min.js";
+        const LanguageTypes = {
+            'BACKEND': ${BACKEND},
+            'DATABASE':${DATABASE},
+            'DEVOPS':${DEVOPS},
+            'FRONTEND':${FRONTEND}
+        }
+
+        let _Loader = {
+
+            $loading : $('.loader').show(),
+            $CodeeditorDiv : $('.assessment-sec').hide(),
+
+            _show : function(){
+                _Loader.$loading.show();
+                _Loader.$CodeeditorDiv.hide();
+            },
+            _hide : function(){
+                _Loader.$loading.hide();
+                _Loader.$CodeeditorDiv.show();
+            }
+        }
+
+        let _Editor_Activity = {
+            editor : null,
+            last_Selected_Language:0, current_Selected_Language:0,
+            _setUpDevOpsLangs : function(){
+                let DevopsLanguageModes= ["https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-groovy.min.js","https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-yaml.min.js",
+                                        "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-powershell.min.js","https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-sh.min.js"]
+
+                DevopsLanguageModes.forEach((url)=> {
+                    jQuery.loadScript = function (url, callback) {
+                        jQuery.ajax({
+                            url: url,
+                            dataType: 'script',
+                            success: callback,
+                            async: true
+                        });
+                    }
+                })
+            },
+
+            _set_Editor : function(){
+                let questionlist=[];
+                $('#themeChange').val('monokai');
+                _Editor_Activity.editor.setTheme("ace/theme/"+'monokai');
+                _Editor_Activity.editor.setOptions({
+                    fontSize: "14px",
+                    enableBasicAutocompletion: true,
+                    enableSnippets: true,
+                    enableLiveAutocompletion: true
+                });
+                $('.output-terminal').html("<div>Output Window<div>");
+            },
+
+            _update_Settings : function(codeArray,lang_type){
+                _Editor_Activity.last_Selected_Language=0;
+                _Editor_Activity.current_Selected_Language=0;
+
+                // Re-configiure code editor
+                _Editor_Activity.editor.setShowPrintMargin(false);
+                _Editor_Activity.editor.session.setMode("ace/mode/"+codeArray[0].syntaxhighlightName);
+                _Editor_Activity.editor.setValue(codeArray[0].default_code);
+                _Editor_Activity.editor.renderer.setScrollMargin(10, 10);
+
+                // Applying code run configurations
+                $('.code_run_ele').hide();
+                $run_elements = $('.code_run_ele.run_'+lang_type.toLowerCase())
+                    if($run_elements.length > 0){
+                        $run_elements.show();
+                    }
+                    else{
+                        $('.code_run_ele.run_default').show();
+                    }
+            },
+
+            _init : function(){
+                _Editor_Activity.editor = ace.edit("editor");
+                _Editor_Activity._set_Editor();
+                $('#themeChange').on('change', function() {
+                    _Editor_Activity.editor.setTheme("ace/theme/"+this.value);
+                });
+
+                $('#languageTypeChange').on('change', function(){
+                    _Editor_Ops._changeEditor(this.value);
+                });
+                $('#languageTypeChange').trigger('change');
+
+                $('#languageChange').on('change', function() {
+                    var code = _Editor_Activity.editor.getValue();
+                    _Editor_Activity.last_Selected_Language=_Editor_Activity.current_Selected_Language;
+                    codeArray[_Editor_Activity.last_Selected_Language].default_code=code;
+                    _Editor_Activity.editor.setValue(codeArray[this.value].default_code);
+                    _Editor_Activity.editor.session.setMode("ace/mode/"+codeArray[this.value].syntaxhighlightName);
+                    _Editor_Activity.current_Selected_Language=this.value;
+                });
+                $('#fontChange').on('change', function() {
+                    _Editor_Activity.editor.setOptions({
+                        fontSize: this.value.toString()+'px',
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: true
+                    });
+                });
+            }
+
+        };
+
+        let _Editor_Ops = {
+
+            _saveCode : function(isUpdate = false){
+                let $button = $('#saveBtn'),
+                $requestMsg = $('#savingMsg'),
+                $responseMsg = $('#savedMsg')
+                if(isUpdate){
+                    if($('.snippet_id').val().length == 0){
+                        notification_manager.display_Notification('Please Enter a Snippet ID to update');
+                        throw new Error("No Snippet ID to update");
+                    }
+                    $button = $('#updateBtn');
+                    $requestMsg = $('#submittingMsg');
+                    $responseMsg = $('#submittedMsg');
+                }
+
+                $('#saveBtn').prop('disabled', true);
+                $('#updateBtn').prop('disabled', true);
+                $requestMsg.css('display','inline');
+                $.post("/code_editor/snippet/save_or_update", {
+                    language : codeArray[$("#languageChange :selected").val()].language,
+                    filename : codeArray[$("#languageChange :selected").val()].filename,
+                    content : _Editor_Activity.editor.getValue(),
+                    snippet_id : $('.snippet_id').val(),
+                    is_Update : isUpdate
+                },
+                function(data, status) {
+                    if(status == "success"){
+                        $('#snippetid').text(data['snippet_id']);
+                        $responseMsg.css('display','inline');
+                        $requestMsg.css('display','none');
+                        setTimeout(() => {
+                            $responseMsg.css('display','none');
+                        }, 3000);
+                        $('#saveBtn').prop('disabled', false);
+                        $('#updateBtn').prop('disabled', false);
+                    }
+                }).fail(function() {
+                    $('.output-terminal').html("<div>Got unexpected response<div>");
+                    $('#saveBtn').prop('disabled', false);
+                    $('#updateBtn').prop('disabled', false);
+                    $requestMsg.css('display','none');
+                });
+
+            },
+
+            _runCode : function(){
+                $(this).prop('disabled', true);
+                $('.output-terminal').empty();
+                $('.output-terminal').html("<div>Running.....<div>")
+                var str = $('.code-footer input')[0].value;
+                var input= str.replace(",", "\n");
+                $.post("/run_snippet", {
+                    name: codeArray[$("#languageChange :selected").val()].filename,
+                    content: _Editor_Activity.editor.getValue(),
+                    language: codeArray[$("#languageChange :selected").val()].language,
+                    stdin:input,
+                    allow_main : true
+                },
+                function(data, status) {
+                    $('#runBtn').prop('disabled', false);
+                    var jsonRes=data;
+                    if(!data) {
+                        $('.output-terminal').html("<div>Got unexpected response<div>")
+                    }
+                    else if(jsonRes.ExamType=="DATABASE") {
+                        if(!jsonRes.stderr){
+                            try{
+                                $('.output-terminal').html('<table class="result_table" style="white-space:nowrap;">'+data.stdout+'</table>');
+                            }
+                            catch(e){
+                                $('.output-terminal').html(data.stdout);
+                            }
+                        }
+                        else
+                            $('.output-terminal').html("<div>"+jsonRes.stderr+"<div>")
+                        }
+
+                    else{
+                        if(!jsonRes.stderr)
+                            $('.output-terminal').html("<div>"+jsonRes.stdout+"<div>")
+                        else
+                            $('.output-terminal').html("<div>"+jsonRes.stderr+"<div>")
+                    }
+                }).fail(function() {
+                    $('#runBtn').prop('disabled', false);
+                    $('.output-terminal').html("<div>Got unexpected response<div>");
+                });
+            },
+
+            _previewCode : function(){
+                var doc = $('#result-Window')[0].contentWindow.document;
+                doc.open();
+                doc.write(_Editor_Activity.editor.getValue());
+                doc.close();
+                $('body').css('overflow','hidden');
+                $('.outline_element').show();
+            },
+
+            _changeEditor : function(languageType, selected_language = null, code = null){
+                _Loader._show();
+                let coding_Languages = LanguageTypes[languageType];
+                $("#languageChange option").each(function(){
+                    this.remove();
+                });
+                $('.code-footer input').val('');
+                $('.output-terminal').html('');
+                if(selected_language && selected_language.length>0){
+                    let  index = coding_Languages.map(function(e) { return e.language; }).indexOf(selected_language);
+                    if (index != 0 || index != null ){
+                        [coding_Languages[index], coding_Languages[0]] = [coding_Languages[0], coding_Languages[index]];
+                    }
+                    if(code && code.length>0){
+                        coding_Languages[0].default_code = code;
+                    }
+                }
+                coding_Languages.forEach((language , i)=>{
+                        $("#languageChange").append($('<option></option>').val(i).html(language['displayname']));
+                    });
+
+                codeArray=coding_Languages;
+                _Editor_Activity._update_Settings(codeArray, languageType);
+                _Loader._hide();
+            },
+
+            _getSnippet : function(){
+                if($('.snippet_id').val().length == 0){
+                    notification_manager.display_Notification('Please Enter a Snippet ID to fetch code');
+                    throw new Error("No Snippet ID to fetch code");
+                }
+                let snippet_id = $('.snippet_id').val();
+                $.get("/code_editor/snippet/get/"+snippet_id, function(data,status){
+                    if(status == "success"){
+                        console.log(data);
+                        $('#snippetid').text(snippet_id);
+                        let languageType = '';
+                        if(['c', 'cpp', 'java', 'python', 'php', 'javascript'].includes(data['language'])){
+                            $('#languageTypeChange').val('BACKEND');
+                            languageType = 'BACKEND';
+                        }
+                        else if(['mssql', 'mysql', 'oracle'].includes(data['language'])){
+                            $('#languageTypeChange').val('DATABASE');
+                            languageType = 'DATABASE';
+                        }
+                        else if(['html', 'javascript', 'css'].includes(data['language'])){
+                            $('#languageTypeChange').val('FRONTEND');
+                            languageType = 'FRONTEND';
+                        }
+                        else{
+                            $('#languageTypeChange').val('DEVOPS');
+                            languageType = 'DEVOPS';
+                        }
+                        $('#languageTypeChange').trigger('change');
+                        _Editor_Ops._changeEditor(languageType, data['language'], data['code']);
+                    }
+                });
+            },
+
+            _init : function(){
+                $("#runBtn").click(function(){
+                    _Editor_Ops._runCode();
+                });
+                $("#previewBtn").click(function(){
+                    _Editor_Ops._previewCode();
+                });
+
+                $('#getBtn').click(function(){
+                    _Editor_Ops._getSnippet();
+                });
+
+                $('#close-preview').click(function(){
+                    $('.outline_element').hide();
+                    if($('.fullscreenFrame').length == 0){
+                        $('body').css('overflow','visible');
+                    }
+                });
+                $("#saveBtn").click(function(){
+                    _Editor_Ops._saveCode(isUpdate=false);
+                });
+
+                $("#toggleHint").click(function(){
+                    let label = 'Hide';
+                    if($('.devops_hint').toggle().css('display') == "none")
+                        label = 'Show';
+                    $(this).text(label+' Hint');
+                });
+
+                $("#toggleAnswer").click(function(){
+                    let label = 'Hide';
+                    if($('.devops_answer').toggle().css('display') == "none")
+                        label = 'Show';
+                    $(this).text(label+' Answer');
+                });
+
+                $("#toggleTerminal").click(function(){
+                    $('.code-testcase').toggle(5, ()=>_Editor_Activity.editor.resize());
+                    $('#hide-show-icon').toggleClass('fa-angle-up');
+                    $('#hide-show-icon').toggleClass('fa-angle-down');
+                })
+
+                $("#updateBtn").click(function(){
+                    let message='Are you sure you want to update ?';
+                    let option2=new Notification_Modal_Option(optionTitle='No',functionDelegate= null);
+                    let option1=new Notification_Modal_Option(optionTitle='Yes',functionDelegate= function(hideModal = null){
+                            _Editor_Ops._saveCode(isUpdate=true);
+                            if(hideModal != null) hideModal(false);
+                        });
+                    notification_manager.display_Decision(message,1,true,option1,option2,'OptionDialog');
+                });
+
+                $('.top-nav-coding').on('click','li.activate_links',function(e)
+                {
+                    _Editor_Ops.clicked_Question = this;
+                    _Editor_Ops._saveAndContinue(_Editor_Ops._fetchNextQuestion);
+
+                });
+            }
+        };
+
+        init : {
+            $.getScript(ACE_URL1 , function() {
+                $.getScript(ACE_URL2, function() {
+                    _Editor_Activity._init();
+                    _Editor_Ops._init();
+                });
+            });
+        }
+
+        return {
+            warnIfUnsaved : _Editor_Ops._saveAndContinue
+        }
+    }
+</script>

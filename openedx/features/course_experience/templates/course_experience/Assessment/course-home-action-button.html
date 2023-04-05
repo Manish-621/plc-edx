@@ -1,0 +1,75 @@
+<!--
+    Author : Naren
+    Description : display each row in dashboard
+    Used-in : dashboard-new.html
+-->
+
+<%page args="exam_attempts, content_id, action_link, open_popup, exam_configs, exam_name" expression_filter="h"/>
+<style>
+.assessment_completed_button{
+    background-color: (0,0,0,0);
+    color:green !important;
+    font-weight: 800;
+    font-size: 16px;
+}
+.assessment_start_button,.assessment_completed_button,.assessment_resume_button{
+    width:150px;
+    font-size:15px;
+}
+</style>
+<%
+from django.utils.translation import ugettext as _
+import json
+
+is_token_generated=False
+is_forked=False
+
+if content_id in exam_configs.keys() :
+    exam_config = exam_configs[content_id]
+else :
+    exam_config = None
+
+if content_id in ide_exams.keys() :
+    ide_exam=ide_exams[content_id]
+    ide_exam_id=ide_exam.id
+    enable_github_oauth=ide_exam.enable_git_oauth
+    if content_id in ide_exam_attempts :
+        ide_exam_attempt=ide_exam_attempts[content_id]
+        if ide_exam_attempt.git_detais :
+            gitdetails=json.loads(ide_exam_attempt.git_detais)
+            is_token_generated= gitdetails["is_token_generated"] if 'is_token_generated' in gitdetails else False
+            is_forked= gitdetails["is_forked"] if 'is_forked' in gitdetails else False
+else :
+    ide_exam_id = 0
+    enable_github_oauth= False
+
+
+            
+%>
+% if content_id not in exam_attempts or exam_attempts[content_id] is None :
+<a class="btn btn-primary assessment_start_button" style="color:white;cursor: pointer;"
+% if exam_config is None:
+    href = "${action_link}"
+% else :
+    onclick="Assessment_Details.showSpecialInstructions(enable_camera = ${str(exam_config.enable_camera).lower()}, 
+                                                        pop_up_window = ${str(exam_config.pop_up_window).lower()}, 
+                                                        blur_restriction = ${str(exam_config.blur_restriction).lower()}, 
+                                                        force_fullscreen = ${str(exam_config.force_fullscreen).lower()}, 
+                                                        disable_copy_paste = ${str(exam_config.disable_copy_paste).lower()}, 
+                                                        blur_count = ${exam_config.blur_count}, 
+                                                        blur_duration = ${exam_config.blur_duration}, 
+                                                        url = '${action_link}', 
+                                                        exam_name = '${exam_name}',
+                                                        ide_exam = ${ide_exam_id},
+                                                        enable_git_oauth= ${str(enable_github_oauth).lower()},
+                                                        is_token_generated= ${str(is_token_generated).lower()},
+                                                         is_forked=${str(is_forked).lower()})"
+% endif
+>
+    <span data-action-type="start">${_("Start Assessment")}</span>                
+</a>
+% else :
+<a class="btn assessment_completed_button">
+    <span data-action-type="start">${_("Completed")}</span>                
+</a>
+% endif

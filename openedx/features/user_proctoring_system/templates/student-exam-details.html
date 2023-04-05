@@ -1,0 +1,253 @@
+## mako
+<%page expression_filter="h"/>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css"
+  integrity="sha256-UK1EiopXIL+KVhfbFa8xrmAWPeBjMVdvYMYkTAEv/HI=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"
+  integrity="sha256-NXRS8qVcmZ3dOv3LziwznUHPegFhPZ1F/4inU7uC8h0=" crossorigin="anonymous"></script>
+
+<%!
+from util.date_utils import strftime_localized
+from dateutil import tz
+from django.utils.translation import ugettext as _
+
+localtz=tz.gettz('Asia/Kolkata')
+%>
+<%inherit file="main.html" />
+
+<%block name="pagetitle">${_("Attempt")}</%block>
+
+<style>
+html{
+    font-family: 'Open Sans',sans-serif !important;
+    font-style: unset !important;
+}
+label,a{
+    font-family: 'Open Sans',sans-serif !important;
+    font-style: unset !important;
+}
+.score_card{
+    padding: 10px;
+    border-radius: 15px;
+    margin:10px 15px 10px 10px;
+    border: 1px solid lightgray;
+    box-shadow: 3px 4px 10px lightgrey;
+    cursor: pointer;
+}
+.score_card:hover{
+    box-shadow: 3px 4px 15px darkgrey;
+    transition-duration: 0.5s;
+    border:1px solid darkslategray;
+}
+.col-md-2 .score_card{
+    margin:10px 0px 10px 0px;
+}
+.div-5{
+    width:20%;
+    position: relative;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+.FORCE_END{
+    background-color: red;
+}
+.BLUR{
+    background-color: lightslategrey;
+}
+.FOCUS{
+    background-color: lightblue;
+}
+.FORCE_END label, .BLUR label{
+    color:white;
+}
+.value label{
+    font-weight: 600;
+}
+
+.Results-Tab a.nav-link{
+    text-decoration: none;
+}
+.table{
+    border-top: none !important;
+}
+
+</style>
+
+<ul class="nav nav-tabs Results-Tab">
+	<li class="nav-item" data-section="exam_results">
+		<a class="nav-link" href="/exams/timed">Exams</a>
+	</li>
+	<li class="nav-item" data-section="exam_results">
+		<a class="nav-link" href="/results/timed/${attempt.proctored_exam.id}">${course_name} | ${attempt.proctored_exam.exam_name}</a>
+    </li>
+    <li class="nav-item" data-section="exam_results">
+		<a class="nav-link active" href="#">${attempt.user}</a>
+	</li>
+</ul>
+<br/>
+<div class="container-fluid">
+    <div class="col-md-12 row">
+        <div class="div-5">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Username</label>
+                </div>
+                <div class="value">
+                    <label>${attempt.user}</label>
+                </div>
+            </div>
+        </div>
+        <div class="div-5">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>E-Mail</label>
+                </div>
+                <div class="value">
+                    <label>${attempt.user.email}</label>
+                </div>
+            </div>
+        </div>
+        <div class="div-5">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Course</label>
+                </div>
+                <div class="value">
+                    <label>${course_name}</label>
+                </div>
+            </div>
+        </div>
+        <div class="div-5">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Exam</label>
+                </div>
+                <div class="value">
+                    <label>${attempt.proctored_exam.exam_name}</label>
+                </div>
+            </div>
+        </div>    
+        <div class="div-5">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Score</label>
+                </div>
+                <div class="value">
+                    <label>${grades.all_total.earned}/${grades.all_total.possible}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="col-md-12 row">
+        <div class="col-md-2">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Duration</label>
+                </div>
+                <div class="value">
+                    <label>${attempt.allowed_time_limit_mins}</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Started At</label>
+                </div>
+                <div class="value">
+                    <label>${strftime_localized(attempt.started_at.astimezone(localtz),'DATE_TIME')}</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Completed At</label>
+                </div>
+                % if attempt.completed_at is not None:
+                <div class="value">
+                    <label>${strftime_localized(attempt.completed_at.astimezone(localtz),'DATE_TIME')}</label>
+                </div>
+                % else :
+                <div class="value">
+                    <label>-</label>
+                </div>
+                % endif
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Out of Window</label>
+                </div>
+                <div class="value">
+                    % if blur_summary:
+                    <label>${blur_summary.get('blur_count')} times</label>
+                    % else :
+                    <label>0 times</label>
+                    % endif
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Out of Window</label>
+                </div>
+                <div class="value">
+                    % if blur_summary:
+                    <label>${blur_summary.get('blur_duration')} sec(s)</label>
+                    % else :
+                    <label>0 sec(s)</label>
+                    % endif
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="score_card_details">
+                <div class="title">
+                    <label>Status</label>
+                </div>
+                <div class="value">
+                    <label>${attempt.status}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr/>
+
+<div class="row proctoring-timeline" style="padding-bottom: 20px;">
+    <div class="col-md-12"><h4>Events</h4></div>
+    <hr/>
+    <div class="row col-md-12">
+        % if len(blur_data) > 0:
+            % for event in blur_data:
+            <div class="col-md-2">
+                <div class="score_card ${event.event}">
+                    <div class="title">
+                        <label>${strftime_localized(event.timestamp.astimezone(localtz),'DATE_TIME')}</label>
+                    </div>
+                    <div class="value">
+                        <label>${event.event}</label>
+                    </div>
+                </div>
+            </div>
+            % endfor
+        % else :
+        <div style="height: 200px; background-color: lightgray;padding: 80px 0%; width: 100%;margin: 10px 30px;font-size: 28px;border-radius: 10px;">
+            <center>No Events</center>
+        </div>
+        % endif
+    </div>
+</div>
+

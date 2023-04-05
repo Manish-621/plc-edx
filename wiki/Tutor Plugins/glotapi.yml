@@ -1,0 +1,9 @@
+name: glotapi
+version: 0.1.0
+patches:
+  openedx-common-settings: |
+    # glot special settings
+    GLOT_AUTH_TOKEN = "Token d11088bc-a29d-4d49-a633-b1b1ae807064"
+    GLOT_RUN_URL = "http://15.207.130.107:8091"
+    GLOT_SNIPPET_URL = "http://15.207.130.107:8090"
+    JUDGE0_RUN_URL = "http://15.207.130.107:8099/submissions"

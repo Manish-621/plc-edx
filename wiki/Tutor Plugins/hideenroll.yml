@@ -1,0 +1,6 @@
+name: hideenroll
+version: 0.1.0
+patches:
+  openedx-common-settings: |
+    #enroll button  settings
+    HIDE_ENROLL_BUTTON = False

@@ -1,0 +1,7 @@
+name: hidediscussion
+version: 0.1.0
+patches:
+  cms-env-features: |
+    "ALLOW_HIDING_DISCUSSION_TAB" : true
+
+

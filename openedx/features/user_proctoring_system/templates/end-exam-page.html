@@ -1,0 +1,57 @@
+## mako
+<%page expression_filter="h"/>
+
+<%!
+from util.date_utils import strftime_localized
+from dateutil import tz
+from django.utils.translation import ugettext as _
+
+localtz=tz.gettz('Asia/Kolkata')
+%>
+<%inherit file="main.html" />
+
+<%block name="pagetitle">${_("Exam Ended")}</%block>
+
+
+<div style="height: 200px; 
+            background-color: #f2f8fb;
+            border-radius: 5px;
+            margin:0% 2%;
+            position: relative;
+            color: #555353;
+            font-size: 22px;
+            font-weight: 700;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+            ">
+    <h3 style="padding: 3%;">
+      Your exam has been stopped due to violation of rules. Please contact your Exam Invigilator, if you have any queries.
+    </h3>
+
+    <div>
+        <a href="#" onclick="closeAssessment()" class="btn btn-default btn-xs backToHomeButton" 
+        style="font-size: 12px;
+                font-weight: 800;
+                background-color: blue;
+                color: white;
+                position: absolute;
+                right: 15px;
+                bottom: 15px;
+                ">
+            Back to MyHome
+    </a>
+    </div>
+</div>
+<script>
+    function closeAssessment(){
+      if(!(window.opener && window.opener !== window && !window.menubar.visible))
+      {
+        window.location = '/';
+      }
+      else{
+        window.opener.location.reload();
+        self.close();
+      }          
+    }
+</script>

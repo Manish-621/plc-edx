@@ -1,0 +1,239 @@
+## mako
+
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+
+<%!
+import json
+
+from django.conf import settings
+from django.utils.translation import ugettext as _
+from django.template.defaultfilters import escapejs
+from django.urls import reverse
+import json
+
+from django_comment_client.permissions import has_permission
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from openedx.core.djangolib.markup import HTML
+from openedx.features.course_experience import UNIFIED_COURSE_TAB_FLAG, SHOW_REVIEWS_TOOL_FLAG
+from openedx.features.learner_analytics import ENABLE_DASHBOARD_TAB
+from openedx.features.portfolio_project import INCLUDE_PORTFOLIO_UPSELL_MODAL
+%>
+
+<%block name="header_extras">
+  <link rel="stylesheet" type="text/css" href="${static.url('paragon/static/paragon.min.css')}" />
+</%block>
+
+<%block name="content">
+<style>
+    .main-course-container{
+    /*padding:0% 5%;*/
+    background-image : url(${static.url('skillAssureImages/course1.jpg')});
+    height:300px;
+    background-size:cover;
+    background-position:center;
+}
+.pcourse-details{
+    /*background-color:white;
+    margin-top:200px;*/
+    font-family: 'Open Sans',sans-serif;
+    font-size : 13px;
+}
+.pcourse-heading{
+    height:100px;
+    margin-top:-60px;
+    margin-left:5%;
+    width:63%;
+    float:left;
+}
+.pcourse-image{
+    width:100px;
+    border : 2px solid white;
+    border-radius:1rem;
+    overflow:hidden;
+    padding:0px;
+    box-shadow:1px 1px 1px 1px lightgray;
+}
+.logo-image{
+    width:116px;
+    height:100px; 
+    background-color:white ;
+}
+.pcourse-title{
+    float:left;
+    position:relative;
+}
+.pcourse-title > span{
+    position:absolute;
+    bottom:40px;
+    font-weight:600;
+    font-size:22px;
+    color:white;
+    text-shadow:0 0 10px rgb(8, 8, 8);
+}
+.pcourse-info{
+    position:absolute;
+    bottom:5px;
+    width:100%;
+    margin-left:-25px;
+    line-height:15px;
+
+}
+.content-wrapper{
+    margin-top:0px !important;
+}
+.assessment-description{
+    padding-left:5%;   
+}
+.data-label{
+    font-weight:600;
+    font-size: 13px;
+    color:darkgray;
+}
+.data-content{
+  font-size:14px;
+}
+.subsection-pcourse{
+    
+    background-size:cover;
+    border-radius : 2rem;
+    overflow:hidden;
+}
+.subsection-pcourse>div{
+    content-align:right;
+}
+.pcourse-image{
+    width:100px;
+    height:100px;
+    background-size:cover;
+    background-image : url(${static.url('skillAssureImages/discoveriD.png')});
+}
+</style>
+<div class ="row main-course-container">
+    <img src="${course_overview.image_urls['small']}" onerror="this.parentNode.removeChild(this)" style="width: 100%;height:300px" alt="" />
+</div>
+<div class="pcourse-details">
+    <div class="row">
+        <div class="pcourse-heading row">
+        % if course_overview.course_custom_details.organization_logo_url and len(course_overview.course_custom_details.organization_logo_url):
+            <div class="pcourse-image" style="width: 120px;">
+                <img src="${course_overview.course_custom_details.organization_logo_url}" onerror="this.parentNode.removeChild(this)" class="logo-image" alt="" />
+            </div>
+        % else:
+            <div class="pcourse-image">
+            </div>
+        % endif
+        <div class="pcourse-title col-lg-8">
+            <span id="chAssessmentTitle">${course_overview.display_name_with_default}</span>
+            <div class="row pcourse-info">
+                <div class="" style ="padding:0px 25px; border-right:1px solid lightgray;">
+                    <div class="data-label">STARTS ON</div>
+                    <div class="data-content">${course.start}</div>
+                </div>
+                <div class="" style="padding:0px 25px;">
+                    <div class="data-label">ENDS ON</div>
+                    <div class="data-content">${course.end}</div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div style="padding: 1% 0% 0% 10%;">
+            % if resume_course_url:
+                    <a class="btn btn-primary action-resume-course" href="${resume_course_url}">
+                        % if has_visited_course:
+                            <span data-action-type="resume">${_("Resume Course")}</span>
+                        % else:
+                            <span data-action-type="start">${_("Start Course")}</span>
+                        % endif
+                    </a>
+                % endif
+        </div>
+    </div>
+    <div class = "row">
+        <div class="assessment-description col-lg-8">
+            <div class="col-lg-12">
+                <h4 style="margin-top: 1rem;
+                            font-family: inherit !important;
+                            font-size: 16px;    
+                            font-weight: bold !important;
+                            margin-bottom: -10px;">
+                        About the Course                    
+                </h4>
+            </div>
+            <hr>
+            <div class="col-lg-12" style="padding-left:25px;font-size:14px;">
+                <p>${course_overview.short_description}</p>
+            </div>
+            <div class="page-content-main">
+                % if course_expiration_fragment:
+                    ${HTML(course_expiration_fragment.content)}
+                % endif
+                % if course_home_message_fragment:
+                    ${HTML(course_home_message_fragment.body_html())}
+                % endif
+    
+                % if update_message_fragment and UNIFIED_COURSE_TAB_FLAG.is_enabled(course.id):
+                    <div class="section section-update-message">
+                        ${HTML(update_message_fragment.body_html())}
+                    </div>
+                % endif
+    
+                % if outline_fragment:
+                    ${HTML(outline_fragment.body_html())}
+                % endif
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <!--<p><h4></h4></p>
+            <div class="clearfix"></div>
+            <div class="clearfix"></div>-->
+            <div class="col-lg-12">
+                <h4 style="margin-top: 1rem;
+                                font-family: inherit !important;
+                                font-size: 16px;    
+                                font-weight: bold !important;
+                                margin-bottom: -10px;">
+                        Instructions
+                </h4>
+            </div>
+            <hr>
+            <ul>
+                <li>Click on <b>Start Course</b> to start a course.</li>
+                % for instruction in json.loads(course_overview.get_course_instructions()):
+                <li>${instruction['value']}</li>
+                % endfor
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    var months    = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    for(let i =0; i<$('.data-content').length;i++)
+    {
+        let e = $('.data-content')[i];
+        let dt = new Date(e.innerText);
+        let dt_str = dt.getDate() + ' ' + months[dt.getMonth()] + ' ' + dt.getFullYear();
+        if(dt_str.includes('NaN')){
+            dt_str = 'Not Available';
+        }
+        e.innerText = dt_str;
+    }
+});
+</script>
+</%block>
+
+<%static:webpack entry="CourseHome">
+    new CourseHome({
+        courseRunKey: "${course_key | n, js_escaped_string}",
+        resumeCourseLink: ".action-resume-course",
+        courseToolLink: ".course-tool-link",
+        goalApiUrl: "${goal_api_url | n, js_escaped_string}",
+        username: "${username | n, js_escaped_string}",
+        courseId: "${course.id | n, js_escaped_string}",
+    });
+</%static:webpack>
+
+<%static:webpack entry="Enrollment">
+    new CourseEnrollment('.enroll-btn', '${course_key | n, js_escaped_string}');
+</%static:webpack>

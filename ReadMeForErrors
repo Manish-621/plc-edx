@@ -1,0 +1,88 @@
+ERROR: Couldn't connect to Docker daemon at http+docker://localunixsocket - is it running?
+Solition: give permission to the tutor to run the file 
+          For permission use command $ sudo -s  
+
+ERROR: for nginx  Cannot start service nginx: driver failed programming external connectivity on endpoint tutorlocal_nginx_1 (1a84468e641373a0f080a0481189fba241cc0bb4e1e92e88995b9c4af36e6319): Error starting userland proxy: listen tcp 0.0.0.0:80: bind: address already in use
+ERROR: Encountered errors while bringing up the project.
+Solition: sudo netstat -tlnp | grep 80 commant to check the port running
+          sudo kill 1374 command to kill the port         
+
+Error: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+SolutionL: run command $ systemctl start docker          
+
+account Creation : tutor local createuser --staff santosh bapise67@gmail.com
+to open shell tutor dev run -P /home/kush/Documents/Praleso_Work/Praleso/edx-platform lms shell
+tutor dev runserver -P /home/kush/Documents/Praleso_Work/Praleso/edx-platform lms
+
+docker stop all the docker container : $ docker stop $(docker ps -aq)
+docker delete all the images : $ docker stop $(docker ps -aq)
+delete all container : docker rm $(docker ps -a -q) -f
+delete all volume : docker volume prune
+see the volume : docker volume ls
+
+file permision to folder and sub-folders : sudo chmod -R a+rwx /path/to/folder
+
+to run just lms command: $ tutor dev runserver lms
+
+docker copy command:
+            docker cp Demo.txt 86e345942424:/home
+            docker cp edx-platform d20cb075f191:/openedx
+docker commit the changes:
+            docker commit 5163ab356745 overhangio/openedx:3.7.4
+/home/kush/Desktop/latest/openedx/edx-platform
+/home/pratian/TutorCMS/latest/openedx/edx-platform
+
+vi code to delete the all line = :%d
+vi code jump to line number = :linenumber example = :14
+
+
+
+tutor local createuser --staff --superuser kush  kuish.kumar@pratian.com
+
+course-v1:sdds+dsd+dsd
+http://localhost:8000/api/enrollment/v1/enrollment
+
+/api/user/v1/accounts/{username}GET /api/user/v1/accounts/{username}/
+http://localhost:8000/api/user/v1/accounts/santosh
+
+
+path error : pip install path.py
+
+mtsqlpassword path :/home/kush/.local/share/tutor/env/apps/mysql
+docker compose yml file :/home/kush/.local/share/tutor/env/local
+
+/home/kush/.local/share/tutor/data/mysql/mysql
+
+to see the user : https://cms.pratian.com/admin/auth/user/
+
+Docker login error : sudo apt install gnupg2 pass
+
+Docker Copy the file : sudo docker cp <file name edx-platform> <container id b3cb0902b5e2>:<container path /openedx>
+example : sudo docker cp edx-platform b3cb0902b5e2:/openedx
+
+Delete the tutor fro the system : 
+1) go to path /home/kush/.local/share eg:</home/(username)/.local/share>
+2) delete the tutor folder by rm -rf tutor 
+
+
+aws server path : /home/ubuntu/TutorCMS/latest/openedx/edx-platform
+
+
+copy the container: 
+1) give the permission to the folder by command chmod -R 777 <fileName>
+2) extract the data from the container in .tar file extension
+3) extract the data by command : tar -C <location file path> -xvf <filename.tar>
+example command : tar -C ./Demo -xvf demo.tar
+
+
+mv source target
+mv folder1 folder2 target
+mv folder1 file1 target
+mv -option source target
+
+aws path cms : tutor dev runserver -P /home/ubuntu/TutorCMS/edxHtmlData/openedx/edx-platform cms
+aus path lms : tutor dev runserver -P /home/ubuntu/TutorCMS/edxHtmlData/openedx/edx-platform lms
+
+http://ec2-52-66-234-33.ap-south-1.compute.amazonaws.com:8000/
+
+http://52.66.234.33:8000/courses/course-v1:demo+121+2019_T1/about

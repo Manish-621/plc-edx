@@ -1,0 +1,109 @@
+## mako
+<%page expression_filter="h"/>
+<%inherit file="main.html" />
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css"
+  integrity="sha256-UK1EiopXIL+KVhfbFa8xrmAWPeBjMVdvYMYkTAEv/HI=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"
+  integrity="sha256-NXRS8qVcmZ3dOv3LziwznUHPegFhPZ1F/4inU7uC8h0=" crossorigin="anonymous"></script>
+  <%!
+  from django.utils.translation import ugettext as _
+  import json  
+  %>
+
+<%block name="pagetitle">${_("FAQs")}</%block>
+<div class="container-fluid">
+    <div class="mainHeading"><span style="font-weight: bold; font-size: 25px;">FAQs</span>
+    </div>  
+    <div class="container-fluid" role="main">
+      % for index,item in enumerate(json.loads(faqs)):
+          <div class="jumbotron">      
+          <h5 class="sectionHeading">${item['title']}</h5>
+          % for index1,question in enumerate(item['questions']): 
+            <div class="collapsible">
+            <a type="button" class="btn-collapsable" data-toggle="collapse" data-target="#collapseExample${index}${index1}" aria-expanded="false" aria-controls="collapseExample">
+            <i class="fa fa-plus" aria-hidden="true"></i><span class="question ml-3">${question['question']}</span>
+            </a>        
+            <div class="collapse" id="collapseExample${index}${index1}">
+            <div class="card card-body">          
+            <p class="answer">${question['answer']}</p>           
+            </div>
+            </div>
+            </div>
+          % endfor
+          </div>
+      % endfor
+    </div>
+</div>
+
+<style>
+  .mainHeading {
+    padding-bottom: 10px;
+    padding-left: 1%;
+  }
+  .jumbotron {
+    padding:0.7rem 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .sectionHeading{
+    font-weight: bold;
+    font-size: 16px;
+    font-family: inherit;
+  }
+  .answer , .question {
+    font-size: 14px;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+  .container-fluid {
+    font-family:  "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+  } 
+  .fa-plus , .fa-minus{
+    line-height: inherit;
+    padding-left: 4px;
+  }
+  .btn-border {
+    /* border: 1px solid #17285d; */
+    transition: border-width 0.3s linear;
+    font-weight: 600;
+    background-color: #00bfff;
+    color:white !important;
+  }
+  .btn-collapsable{
+    display: flex;
+    width: 100%;
+    padding:10px 25px 10px 10px;
+    position: relative;
+  }
+
+.btn-border::after{
+    content: '';
+    position: absolute;
+    left: 42%;
+    top: 100%;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #00bfff;
+    clear: both;
+    z-index: 99999999;
+}
+.collapsible {
+  margin-bottom: 1px;
+}
+</style>
+<script>
+  $('.btn-collapsable').off('click').on('click',function(){
+    $("i", this).toggleClass("fa-plus fa-minus");
+    $(this).toggleClass("btn-border");
+  });
+
+</script>

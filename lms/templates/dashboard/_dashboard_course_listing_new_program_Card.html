@@ -1,0 +1,109 @@
+<%page args="program, entityName" expression_filter="h"/>
+
+<%!
+from datetime import datetime
+import urllib
+import pytz
+
+from pytz import timezone
+from dateutil import tz
+
+from django.utils.translation import ugettext as _
+from django.utils.translation import ungettext
+from django.urls import reverse
+from course_modes.helpers import enrollment_mode_display
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from openedx.core.djangolib.markup import HTML, Text
+from openedx.features.course_experience import course_home_url_name
+from student.helpers import (
+  VERIFY_STATUS_NEED_TO_VERIFY,
+  VERIFY_STATUS_SUBMITTED,
+  VERIFY_STATUS_RESUBMITTED,
+  VERIFY_STATUS_APPROVED,
+  VERIFY_STATUS_MISSED_DEADLINE,
+  VERIFY_STATUS_NEED_TO_REVERIFY,
+  DISABLE_UNENROLL_CERT_STATES,
+)
+from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_params
+%>
+
+<%  
+  localtz=tz.gettz('Asia/Kolkata')
+  current_time = datetime.now().replace(tzinfo=pytz.UTC).astimezone(localtz)
+
+  assessment_status_openAssessment = True
+  assessment_status_text = 'ACTIVE'
+  assessment_status_class='active_assessment'
+  assessment_status_message=''
+  if program.end_date is not None and program.end_date.astimezone(localtz) < current_time:
+    assessment_status_text = 'EXPIRED'
+    assessment_status_class='expired_assessment'
+    assessment_status_openAssessment = False
+    assessment_status_message = 'You are late! The last date to take this '+entityName+' was '+program.end_date.astimezone(localtz).strftime('%d %B %Y')
+  elif program.start_date is not None and program.start_date.astimezone(localtz) > current_time:
+    assessment_status_text = 'SCHEDULED'
+    assessment_status_class='future_assessment'
+    assessment_status_openAssessment = False
+    assessment_status_message = 'You are early! This '+entityName+' starts on '+program.start_date.astimezone(localtz).strftime('%d %B %Y')
+%>
+
+<%namespace name='static' file='../static_content.html'/>
+
+
+<li class="course-item" style="margin-bottom: 0;
+                                padding-bottom: 0; 
+                                width:100%;
+                                font-family: 'Open Sans',sans-serif;">
+  <div class="course-container">
+    <a 
+        % if assessment_status_openAssessment:
+        href="programs/P4765765${program.id}5675674" 
+        style="text-decoration: none !important;" 
+        % else :
+        class="inactive_assessment"
+        style="text-decoration: none !important;cursor:pointer;" 
+        data-warning="${assessment_status_message}"
+        % endif
+        >
+        <article class="course" aria-labelledby="course-title-${program.id}" id="course-card-${program.id}">
+          <section class="details" aria-labelledby="details-heading-${program.id}" style="height: 225px;">
+              <h2 class="hd hd-2 sr" id="details-heading-${program.id}">${_('Course details')}</h2>
+            <div class="wrapper-course-image" style="display: flex;" aria-hidden="true">
+              <span class="cover ${entityName}_card">
+                <img src="${program.image_url}" class="course-image" alt=" " onerror="this.parentNode.removeChild(this)" style="width: 100%; height: 100%;"/>
+              </span>
+            </div>
+            <div>
+              <span>
+                <img src="${program.organization_logo_url}" class="course-subimage" alt=" "   onerror="this.parentNode.removeChild(this)"  />
+              </span>
+            </div>
+            <div class="wrapper-course-details" style="padding: 10px;margin-bottom:0px;margin-top:10px;">
+              <h3 class="course-title" id="course-title-${program.id}">
+                <div class="course-title" style="height: 30px;">${program.program_name}</div>
+                    <div class="col-lg-12 course-category" style="margin-top:10px;margin-bottom:8px;"><i class="fa fa-calendar" aria-hidden="true"></i>
+                      % if program.start_date is not None:
+                      ${program.start_date.astimezone(localtz).strftime('%d %B %Y')}
+                      % endif
+                      % if program.end_date is not None:
+                      - ${program.end_date.astimezone(localtz).strftime('%d %B %Y')}
+                      % endif
+                    </div>
+                    <div class="row">
+                      <div class="course-category col-md-6 ellipse">&nbsp; ${program.focus_area}</div>
+                      <div class="course-category col-md-6">
+                        <i class="fa fa-clock-o" aria-hidden="true">
+                          &nbsp; ${program.duration}
+                        </i>
+                      </div>
+                    </div>
+              </h3>
+            </div>
+          </section>
+        </article>
+    </a>
+  </div>
+</li>
+
+
+

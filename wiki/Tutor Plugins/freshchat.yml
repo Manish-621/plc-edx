@@ -1,0 +1,10 @@
+name: freshchat
+version: 0.1.0
+patches:
+  openedx-common-settings: |
+    # freshchat special settings
+    FRESH_CHAT_AUTH_TOKEN = "6b997bac-59f2-4f6f-8821-b5b0cd7eed55"
+    FRESH_CHAT_HOST_NAME = "https://wchat.freshchat.com"
+    FRESH_CHAT_JS_PATH = "https://wchat.freshchat.com/js/widget.js"
+
+

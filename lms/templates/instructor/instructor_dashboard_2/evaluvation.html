@@ -1,0 +1,80 @@
+<%page args="section_data" expression_filter="h"/>
+<%!
+from django.utils.translation import ugettext as _
+from openedx.core.djangolib.markup import HTML, Text
+%>
+
+<div class="container" id="courses_list">
+
+  <div class="enrollment-wrapper" >
+
+      <% modes = section_data['courseAttended'] %>
+        <table id="example" class="table center" style="width: 90vw;">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Exam</th>
+                <th scope="col">Question</th>
+                <th scope="col">Time Limit in Mins </th>
+                <th scope="col">No of Students Attended</th>
+                <th scope="col">Max Score</th>
+              </tr>
+            </thead>
+            <tbody>
+
+             % for index,coding_exam in enumerate(section_data['courseAttended']):
+              <tr>
+                <th scope="row">${index+1}</th>
+                <%
+                  proctored_exam = coding_exam.proctored_exam
+                  score = coding_exam.max_score
+                %>
+                <td data-exam-id="${coding_exam.id}" 
+                % if not count == 0:
+                class="examname" style="cursor: pointer;"                 
+                % endif 
+                ><a>${ coding_exam.proctored_exam.exam_name }</a></td>
+                <td>${ section_data['titles'][coding_exam.id]}</td>
+                <td>${ coding_exam.proctored_exam.time_limit_mins }</td>
+                <td>${ section_data['students_count'][coding_exam.id]}</td>
+                <td>${score}</td>
+              </tr>
+             % endfor
+              
+            </tbody>
+        </table>
+  </div>
+</div>
+<div id="evaldata">    
+</div>
+<style>
+  table {
+   border-collapse: separate;
+   border-spacing: 0 20px;
+ }
+ tr th:first-child {
+   padding-left: 20px;
+   width: 10%;
+ }
+</style>     
+<script>
+  $( document ).ready(function() {   
+  $('#header-evaluvation').html('List of Exams')
+  $(".examname").click(function(){
+    var examid = $(this).attr('data-exam-id')
+    $.post("/courses/evaluation/students", {
+                coding_exam_id: examid,
+                },
+              function(data, status) {                
+                console.log('success')
+                $('#courses_list').css('display','none')
+                $('#evaldata').html(data.htmlpage)
+               }).fail(function() {
+                console.log('fail')
+                });
+  });  
+  }); 
+</script>   
+
+
+      

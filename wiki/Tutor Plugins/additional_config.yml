@@ -1,0 +1,9 @@
+name: additional_config
+version: 0.1.0
+patches:
+  openedx-common-settings: |
+    # azure cli api special settings
+    ENABLE_CARD_VIEW = True,
+    CODE_COMPILER_OPTION = 1
+
+

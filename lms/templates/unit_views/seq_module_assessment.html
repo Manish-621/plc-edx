@@ -1,0 +1,496 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="/static/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<style>
+.submit-attempt-container{
+    display : none !important;
+}
+.submission__answer__file__block{
+  display: none;
+}
+/* If save option not needed in open response assessment. */
+.response__submission__actions{
+    display : none !important;
+}
+.step--staff-assessment, .step--grade{
+    display:none !important;
+}
+.openassessment__message>.message__content, .ora-datetime{
+  display:none;
+}
+
+
+/* The sidebar menu */
+.sidebar-new {
+  min-height: 20em;
+  height: 30em; /* to fit frame*/
+  max-height: 35em;
+  width: 250px; /* 250 width - change this with JavaScript */
+  position: absolute;
+  z-index: 1;
+  top: 0;/* Stay on top */
+  left: 0;
+  background-color:#F8F8F8;
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 50px; /* Place content 60px from the top */
+  transition: 0.5s; /*0.5 second transition effect to slide in the sidebar */
+  transition-timing-function: ease;
+  float:left;
+  padding-bottom: 20px;
+}
+
+
+/* The sidebar links */
+.sidebar-new .nav-item {
+  padding: 0.25em 1em;
+  display: block;
+  transition: 0.3s;
+  transition-timing-function: ease;
+  color:#444444;
+  font-size: 14px;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidebar-new .nav-item:hover {
+  background-color: #dbdbdb;
+    color: #1976d2;
+    text-shadow: 0 0 5px #fff
+}
+
+.active{
+  color:#0075b4 !important;
+}
+
+/* Position and style the close button (top right corner) */
+.sidebar-new .closebtn {
+  position: absolute;
+  top: 0;
+  right: 0.5em;
+  font-size: 1.5em;
+  cursor: pointer;
+  color:#0075b4;
+  width:10%;
+}
+
+.nav-topic-head{
+  position: absolute;
+  top: 0;
+  font-size:16px;
+  padding: 0.25em 1em;
+
+}
+
+/* The button used to open the sidebar */
+.openbtn {
+  cursor: pointer;
+  background-color:#0075b4;
+  color: #f8f8f8 ;
+  padding: 5px 10px;
+  border: none;
+  transition-timing-function: ease;
+  left: 1.3em !important;
+  z-index: 1;
+  background-image: none;
+}
+
+.openbtn:hover {
+  background-color: #444;
+}
+
+.complete-mark{
+  float: right;
+  width:10%;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#saidnav-main-content {
+  transition: margin-left 0.5s; /* If you want a transition effect */
+  padding: 5px;
+  transition-timing-function: ease;
+  margin-left : 250px;
+}
+
+.main-container{
+display: inline-block;
+width: 100%;
+position: relative;
+}
+
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidebar-new {padding-top: 15px;}
+  .sidebar-new li {font-size: 18px;}
+}
+
+
+.navbar-container,.menu-toggle-button{
+position: sticky;
+top: 0;
+}
+
+
+.side-nav-incontent-next{
+  right: 1.2em !important;
+}
+
+.side-nav-incontent-previous{
+  left: 1.3em !important;
+}
+
+
+.side-nav-incontent-previous, .side-nav-incontent-next {
+    position: fixed;
+    top: 60% !important;
+    font-weight: bold;
+    height:3em !important;
+    min-width: 2em !important;
+}
+
+.main-content-body {
+   /* width: 90%;*/
+   width: 100%;
+   margin-top:0px;
+    margin: 0 auto;
+}
+.content-wrapper.main-container{
+  margin-top:0px;
+}
+.side-nav-incontentbuttons,.menu-toggle-button{
+  display: none;
+}
+
+.sequence-nav{
+  height: 0 !important;
+  margin: 0 !important;
+}
+
+.nav-bar-items-title{
+  display: block;
+  width: 97%;
+}
+
+.nav-bar-item-title-name,.nav-topic-head{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+
+}
+.nav-topic-head{
+  width: 70%;
+}
+
+.nav-bar-item-title-name{
+  width: 84%;
+}
+
+
+#sequence-list,.sidebar-new .nav-item{
+  width:99%;
+}
+
+
+.bookmark-icon,.bookmark-icon-sr{
+  width:3%;
+}
+
+.unit-title{
+  color: #3277a8e8;
+  display: inline-block;
+}
+
+.top-nav-coding li.nav-item a .nav-bar-item-title-name{
+  text-decoration: underline;
+  color: #3277a8e8;
+  font-weight: 600;
+}
+.top-nav-coding li.submitted a .nav-bar-item-title-name{
+  color: white !important;
+  background-color: #55a562;
+}
+.top-nav-coding li.active a .nav-bar-item-title-name{
+  font-weight: 1000;
+  color: white !important;
+  background-color: #3277a8e8;
+}
+.top-nav-coding li.saved a .nav-bar-item-title-name{
+  /* color: white !important;
+  background-color: #eb931a; */
+
+}
+.top-nav-coding li a .nav-bar-item-title-name{
+  height: 25px;
+  color: black;
+  line-height: 1;
+  border-radius: 4px;
+  padding: 4px 5px;
+  width: auto;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  /*border-top: 16px solid #3277a8e8;*/
+  border-bottom: 16px solid #3277a8e8;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  margin-left: 43%;
+  margin-top: 18%;
+  margin-bottom: 24%;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+</style>
+<div id="sequence_${element_id}" class="sequence" data-set="six" data-id="${item_id}"
+     data-position="${position}" data-ajax-url="${ajax_url}"
+     data-next-url="${next_url}" data-prev-url="${prev_url}"
+     data-save-position="${'true' if save_position else 'false'}"
+     data-show-completion="${'true' if show_completion else 'false'}"
+>
+  % if banner_text:
+    <div class="pattern-library-shim alert alert-information subsection-header" tabindex="-1">
+      <span class="pattern-library-shim icon alert-icon fa fa-info-circle" aria-hidden="true"></span>
+      <span class="sr">${_('Important!')}&nbsp;</span>
+      <div class="pattern-library-shim alert-message">
+        <p class="pattern-library-shim alert-copy">
+          ${banner_text}
+        </p>
+      </div>
+    </div>
+  % endif
+  % if len(items) > 1 :
+    <div class="main-container">
+  % else:
+    <div class="main-container-1">
+  % endif
+
+  % if len(items) > 1 :
+
+  <div class="navbar-container">
+    <nav class="sidebar-new" id="mySidebar-new" aria-label="${_('Sequence')}">
+      <ol id="sequence-list" role="tablist">
+        <li href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#9776;</li>
+        % if gated_content['gated']:
+        <li class="active nav-item tab" title="${_('Content Locked')}" id="tab_0" role="tab" tabindex="-1" aria-selected="true" aria-expanded="true" aria-controls="content_locked" disabled>
+            <span class="icon fa fa-lock" aria-hidden="true"></span>
+
+        </li>
+        % else:
+        % for idx, item in enumerate(items):
+          %if idx==0:
+            <div class="nav-topic-head" title="${item['page_title_parent']}">${item['page_title_parent']}</div>
+          %endif
+        <li role="presentation" class="seq_${item['type']} inactive nav-item tab"
+            role="tab"
+            tabindex="-1"
+            aria-selected="false"
+            aria-expanded="false"
+            aria-controls="seq_content"
+            data-index="${idx}"
+            data-id="${item['id']}"
+            data-element="${idx+1}"
+            data-page-title="${item['page_title']}"
+            data-path="${item['path']}"
+            data-graded="${item['graded']}"
+            id="tab_${idx}"
+            data-toggle="tab">
+
+            <div class="nav-bar-items-title"><div class="nav-bar-item-title-name" onclick="refreshWindow(`tab_${idx}`)" title="${item['page_title']}">${item['page_title']}</div>
+            <span class="icon fa seq_${item['type']}" aria-hidden="true"> &nbsp;</span>
+
+            <span class="fa fa-fw fa-bookmark bookmark-icon ${"is-hidden" if not item['bookmarked'] else "bookmarked"}" aria-hidden="true"></span>
+            <div class="sr"><span class="sr bookmark-icon-sr">&nbsp;${_("Bookmarked") if item['bookmarked'] else ""}</span></div>
+            % if 'complete' in item:
+            <span
+              class="complete-mark fa fa-check-circle check-circle ${"is-hidden" if not item['complete'] else ""}"
+              style="color:green"
+              aria-hidden="true"
+            ></span>
+            % endif
+        </div>
+        </li>
+        % endfor
+        % endif
+      </ol>
+    </nav>
+  </div>
+  % endif
+  <div class="menu-toggle-button">
+    <button class="openbtn" onclick="openNav()">&#9776;</button>
+  </div>
+
+
+
+  % if len(items) > 1 and not CodeEditor['enable']:
+    <div id="saidnav-main-content">
+  % else:
+    <div id="saidnav-main-content-1">
+  % endif
+    <div class="side-nav-incontentbuttons">
+      % if len(items) > 1 :
+        <div class="sequence-nav">
+          <button class="side-nav-incontent-previous sequence-nav-button button-previous1 custom_prev">
+            <span class="icon fa fa-chevron-prev" aria-hidden="true"></span>
+            <!-- <span class="sequence-nav-button-label">${_('Previous')}</span> -->
+          </button>
+          <button class="side-nav-incontent-next sequence-nav-button button-next1 custom_next">
+            <!-- <span class="sequence-nav-button-label">${_('Next')}</span> -->
+            <span class="icon fa fa-chevron-next" aria-hidden="true"></span>
+          </button>
+        </div>
+      % endif
+    </div>
+
+    % if len(items) > 1 :
+      <div class="main-content-body">
+    % else:
+      <div class="main-content-body-1">
+    % endif
+      % if gated_content['gated']:
+        <%include file="_gated_content.html" args="prereq_url=gated_content['prereq_url'], prereq_section_name=gated_content['prereq_section_name'], gated_section_name=gated_content['gated_section_name']"/>
+      % else:
+        <div class="sr-is-focusable" tabindex="-1"></div>
+        % for idx, item in enumerate(items):
+          <div id="seq_contents_${idx}"
+            aria-labelledby="tab_${idx}"
+            aria-hidden="true"
+            class="seq_contents tex2jax_ignore asciimath2jax_ignore">
+              ${item['content']}
+          </div>
+        % endfor
+        <div id="seq_content" role="tabpanel"></div>
+      % endif
+    </div>
+  </div>
+  </div>
+
+  % if len(items) > 1 :
+    <nav class="sequence-bottom hidden" aria-label="${_('Section')}">
+    <button class="sequence-nav-button button-previous">
+      <span class="icon fa fa-chevron-prev" aria-hidden="true"></span>
+      <span>${_('Previous')}</span>
+    </button>
+    <button class="sequence-nav-button button-next">
+      <span>${_('Next')}</span>
+      <span class="icon fa fa-chevron-next" aria-hidden="true"></span>
+    </button>
+    </nav>
+  % endif
+
+</div>
+
+% if not is_staff and is_proctored:
+<style>
+  #fc_frame{
+    display:none;
+  }
+</style>
+% endif
+
+% if not is_staff and is_proctored:
+<%include file="seq_module_views/user_proctoring_scripts.html" args="exam_config=exam_config, exam_id=exam_id, proctored_data=proctored_data"/>
+% endif
+
+<%include file="seq_module_views/exam_element_management_scripts.html"/>
+<script>
+    $(document).ready(function(){
+        var activeTab = localStorage.getItem('activeTab');
+        console.log(activeTab);
+        if(activeTab && document.getElementById(activeTab)){
+            document.getElementById(activeTab).click();
+        }
+    });
+    function refreshWindow(tab_idx){
+        localStorage.setItem('activeTab', tab_idx);
+        location.reload();
+    }
+  function setuiguuhhi(){
+  }
+</script>
+<script>
+/* Set the width of the sidebar to 250px and the left margin of the page content to 250px */
+function openNav() {
+  document.getElementById("mySidebar-new").style.width = "250px";
+  document.getElementById("saidnav-main-content").style.marginLeft = "250px";
+  $('#saidnav-main-content .openbtn').hide();
+  $('.side-nav-incontentbuttons,.menu-toggle-button').hide();
+  $('.sidebar-new .closebtn').show();
+}
+
+/* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+function closeNav() {
+  document.getElementById("mySidebar-new").style.width = "0";
+  document.getElementById("saidnav-main-content").style.marginLeft = "0";
+  $('#saidnav-main-content .openbtn').show();
+  $('.side-nav-incontentbuttons,.menu-toggle-button').show();
+  $('.sidebar-new .closebtn').hide();
+}
+
+$(function(){
+    function getCurrentUnit(){
+      return $('#mySidebar-new .nav-item.tab').filter(function(item){return $($('#mySidebar-new .nav-item.tab')[item]).attr('data-id')==$('.xblock-student_view-vertical').attr('data-usage-id');});
+    }
+
+    if($(getCurrentUnit()).prev('.nav-item.tab').length==0){
+      $('.custom_prev').addClass('disabled');
+    }
+
+    if($(getCurrentUnit()).next('.nav-item.tab').length==0){
+      $('.custom_next').addClass('disabled');
+    }
+    $('.side-nav-incontentbuttons').on('click','.custom_prev',function(e){
+      e.stopPropagation();
+      console.log('prev');
+      if($(getCurrentUnit()).prev('.nav-item.tab').length >0)
+      {
+        try{
+          $(getCurrentUnit()).prev('.nav-item.tab').click();
+        }
+        catch(error){}
+        $('.custom_next').removeClass('disabled');
+        if($(getCurrentUnit()).prev('.nav-item.tab').length==0){
+          $('.custom_prev').addClass('disabled');
+        }
+      }
+    });
+    $('.side-nav-incontentbuttons').on('click','.custom_next',function(e){
+      e.stopPropagation();
+      console.log('next');
+      if($(getCurrentUnit()).next('.nav-item.tab').length >0)
+      {
+        try{
+          $(getCurrentUnit()).next('.nav-item.tab').click();
+        }
+        catch(error){}
+        $('.custom_prev').removeClass('disabled');
+        if($(getCurrentUnit()).next('.nav-item.tab').length==0){
+          $('.custom_next').addClass('disabled');
+        }
+      }
+    });
+
+    $('.sequence').on('keyup','input[type=text]',_.debounce(function(){
+        $(this).parent().parent().parent().parent().parent().parent().find('.submit').click();
+        $(this).focus();
+    },3000));
+
+    $('.sequence').on('change','.field-input',function(){
+        $(this).parent().parent().parent().parent().parent().parent().parent().find('.submit').click();
+    });
+});
+
+</script>

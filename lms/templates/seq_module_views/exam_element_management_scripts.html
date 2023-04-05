@@ -1,0 +1,58 @@
+
+
+<script>
+    let HideUploadElements = Object.freeze(new function(){
+  let hidden = false;
+  let timer = null;
+
+  let elementInView = function(elem){
+    if($(elem).length == 0) return false;
+    return $(window).scrollTop() < $(elem).offset().top + $(elem).height() ;
+  };
+
+  let domModifications = function(){
+    $('.step__instruction>p').html('Enter your response to the prompt. <strong class="emphasis">After you submit your response, you cannot edit it</strong>.');
+    $('textarea').bind("cut copy paste",function(e) {
+      e.preventDefault();
+    });
+    $('input[type=text]').bind("cut copy paste",function(e) {
+      e.preventDefault();
+    });
+    $('textarea').bind("cut copy paste",function(e) {
+      e.preventDefault();
+    });
+  };
+
+  let hideElements = function(){
+    for(var i=0; i< $('.submission__answer__file__block').length; i++)
+    {
+      if($($('.submission__answer__file__block')[i]).find('a').text().indexOf('View the files associated with this') == -1)
+      { 
+        $($('.submission__answer__file__block')[i]).show();
+      }
+      else{
+        $($('.submission__answer__file__block')[i]).remove();
+      }
+    }
+  };
+
+  eventListeners :{
+    
+    $(window).scroll(function(){
+      if (elementInView($('.submission__answer__file__block')))
+      {
+        hideElements();
+      }
+    });
+    $(function(){
+      domModifications()
+      timer = setInterval(function(){
+        hideElements();
+        domModifications();
+      }, 1000);
+      setTimeout(function(){hidden=true;clearInterval(timer);},60000);
+    })
+  };
+  
+});
+</script>

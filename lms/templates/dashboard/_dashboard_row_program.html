@@ -1,0 +1,70 @@
+<!--
+    Author : Naren
+    Description : display each row in dashboard
+    Used-in : dashboard-new.html
+-->
+
+<%page args="programs_list, listID, listTitle, NA_Message, entityName, ENABLE_CARD_VIEW" expression_filter="h"/>
+
+<!--Importing libraries-->
+<%!
+from datetime import datetime, timedelta
+from django.urls import reverse
+from six import text_type
+from django.utils.translation import ugettext as _
+from django.template import RequestContext
+from third_party_auth import pipeline
+from util.date_utils import strftime_localized
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from openedx.core.djangolib.markup import HTML, Text
+
+%>
+
+<div class="my-courses col-lg-12" id="my-courses">
+    
+    <header class="wrapper-header-courses">
+        <h2 class="header-courses">${listTitle}</h2>
+    </header>
+
+    % if programs_list and len(programs_list) > 0:
+    <ul class="listing-courses" id="${listID}">
+
+        % for program in programs_list:
+            % if program.entity_group.is_active :
+                % if ENABLE_CARD_VIEW :
+                    <%include file='_dashboard_course_listing_new_program_Card.html' args='program=program.entity_group, entityName=entityName' />
+                % else:
+                    <%include file='_dashboard_course_listing_new_program.html' args='program=program.entity_group, entityName=entityName' />
+                % endif
+            % endif
+        % endfor
+    </ul>
+    % else:
+    <div class="empty-dashboard-message">
+        <p>${NA_Message}</p>
+        % if empty_dashboard_message:
+        <p class="custom-message">${empty_dashboard_message | n, decode.utf8}</p>
+        %endif
+        % if settings.FEATURES.get('COURSES_ARE_BROWSABLE'):
+        <!--<a class="btn btn-primary" href="${marketing_link('COURSES')}">
+            ${_("Explore courses")}
+        </a>-->
+        %endif
+    </div>
+    % endif
+</div>
+<br/>
+
+
+<script>
+    
+    $('#${listID}').slick({
+        infinite: true,
+        slidesToShow: 4,
+        slidesToScroll: 4,
+        prevArrow: '<div class="slick-prev"><i class="fa fa-2x fa-angle-left" style="padding: 7px;" aria-hidden="true"></i></div>',
+        nextArrow: '<div class="slick-next"><i class="fa fa-2x fa-angle-right" style="padding: 7px;" aria-hidden="true"></i></div>'
+    });
+            
+</script>

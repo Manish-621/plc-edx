@@ -1,0 +1,7 @@
+<div class="result-excerpt">
+<a class="" href="<%- url %>"><%- location.join(' ▸ ') %></a>
+</div>
+
+<span class="result-course-name"><%- course_name %>:</span>
+<span class="result-location"><%= HtmlUtils.ensureHtml(excerptHtml) %></span>
+<span class="result-type"><%- content_type %></span>

@@ -1,0 +1,6 @@
+name: specialexams
+version: 0.1.0
+patches:
+  common-env-features: |
+    "ENABLE_SPECIAL_EXAMS":true,
+    "ENABLE_SEARCH":true

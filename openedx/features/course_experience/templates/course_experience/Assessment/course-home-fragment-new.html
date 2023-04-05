@@ -1,0 +1,304 @@
+## mako
+
+<%page expression_filter="h"/>
+<%namespace name='static' file='../../static_content.html'/>
+
+<%!
+import json
+
+from django.conf import settings
+from django.utils.translation import ugettext as _
+from django.template.defaultfilters import escapejs
+from django.urls import reverse
+
+from django_comment_client.permissions import has_permission
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from openedx.core.djangolib.markup import HTML
+from openedx.features.course_experience import UNIFIED_COURSE_TAB_FLAG, SHOW_REVIEWS_TOOL_FLAG
+from openedx.features.learner_analytics import ENABLE_DASHBOARD_TAB
+from openedx.features.portfolio_project import INCLUDE_PORTFOLIO_UPSELL_MODAL
+%>
+<%
+course_sections = blocks.get('children')
+is_Program = 0
+if len(course_sections[0].get('children', [])) > 1 :
+    is_Program = 1
+%>
+
+
+<script>
+    document.title = "${course_overview.display_name_with_default}" +" - Discoveri - SkillAssure";
+</script>
+
+<style>
+.main-assessment-container{
+   /* padding:0% 5%;*/
+    background-image : url(${static.url('skillAssureImages/assessment2.jpg')});
+    height:300px;
+    background-size:cover;
+}
+.assessment-details{
+    /*background-color:white;
+    margin-top:200px;*/
+    font-family: 'Open Sans',sans-serif;
+    font-size : 13px;
+}
+.assessment-heading{
+    height:100px;
+    margin-top:-60px;
+    margin-left:5%;
+    width:63%;
+    float:left;
+}
+.assessment-image{
+    width:100px;
+    border : 2px solid white;
+    border-radius:1rem;
+    overflow:hidden;
+    padding:0px;
+    box-shadow:1px 1px 1px 1px lightgray;
+}
+.assesment-title{
+    float:left;
+    position:relative;
+}
+.assesment-title > span{
+    position:absolute;
+    bottom:40px;
+    font-weight:600;
+    font-size:22px;
+    color:white;
+    text-shadow:0 0 10px rgb(8, 8, 8);
+}
+.assessment-info{
+    position:absolute;
+    bottom:5px;
+    width:100%;
+    margin-left:-25px;
+    line-height:15px;
+
+}
+.content-wrapper{
+    margin-top:0px !important;
+}
+.assessment-description{
+    padding-left:5%;   
+}
+.data-label{
+    font-weight:600;
+    font-size: 12px;
+    color:darkgray;
+}
+.data-content{
+  font-size:14px;
+}
+.subsection-assesment{
+    
+    background-size:cover;
+    border-radius : 2rem;
+    overflow:hidden;
+}
+.subsection-assesment>div{
+    content-align:right;
+}
+.assessment-image{
+    width:100px;
+    height:100px;
+    background-size:cover;
+    background-image : url(${static.url('skillAssureImages/discoveriD.png')});
+}
+.proctored_exam_status{
+    display: none !important;
+}
+.logo-image{
+    width:116px;
+    height:100px; 
+    background-color:white ;
+}
+</style>
+<%include file='assessment-details.html' />
+<div class ="row main-assessment-container">
+    <img src="${course_overview.image_urls['small']}" onerror="this.parentNode.removeChild(this)" style="width: 100%;height:300px"  alt="" />  
+      <!--<img src="${static.url('skillAssureImages/assessment2.jpg')}" width="100%"/>-->
+</div>
+<div class="assessment-details">
+    <div class="row">
+        <div class="assessment-heading row">
+    % if course_overview.course_custom_details.organization_logo_url and len(course_overview.course_custom_details.organization_logo_url):
+        <div class="assessment-image" style="width: 120px;">
+            <img src="${course_overview.course_custom_details.organization_logo_url}" onerror="this.parentNode.removeChild(this)" class="logo-image" alt="" />
+        </div>
+    % else:
+        <div class="assessment-image">
+        </div>
+    % endif
+        <div class="assesment-title col-lg-8">
+            <span id="chAssessmentTitle">${course_overview.display_name_with_default}</span>
+            <div class="row assessment-info">
+                <div class="" style ="padding:0px 25px; border-right:1px solid lightgray;">
+                    <div class="data-label">STARTS ON</div>
+                    <div class="data-content date-content">${course.start}</div>
+                </div>
+                % if is_Program  or not course_sections[0].get('children', [0])[0]['id'] in exam_durations.keys():
+                <div class="" style="padding:0px 25px;">
+                    <div class="data-label">ENDS ON</div>
+                    <div class="data-content date-content">${course.end}</div>
+                </div>
+                % else :
+                <div class="" style="padding:0px 25px; border-right:1px solid lightgray;">
+                    <div class="data-label">ENDS ON</div>
+                    <div class="data-content date-content">${course.end}</div>
+                </div>
+                <div class="" style="padding:0px 25px;">
+                    <div class="data-label">DURATION</div>
+                    <div class="data-content">${exam_durations[course_sections[0].get('children', [0])[0]['id']]} Min(s)</div>
+                </div>
+                % endif
+            </div>
+        </div>
+        </div>
+        <div style="padding: 1% 0% 0% 10%;">
+            % if not is_Program :
+                <%include file="course-home-action-button.html" 
+                args="exam_attempts=exam_attempts,
+                    content_id=course_sections[0].get('children', [0])[0]['id'], 
+                    action_link=resume_course_url, 
+                    open_popup=True,
+                    exam_configs=exam_configs,
+                    exam_name=course_overview.display_name_with_default,
+                    ide_exams=ide_exams"/>
+            % endif
+        </div>
+    </div>
+    <div class = "row">
+        <div class="assessment-description col-lg-8">
+            <div class="col-lg-12">
+                <h4 style="margin-top: 1rem;
+                            font-family: inherit !important;
+                            font-size: 16px;    
+                            font-weight: bold !important;
+                            margin-bottom: -10px;">
+                    % if is_Program :
+                        About the Assessment
+                    % else :
+                        About the Assessment
+                    % endif
+                </h4>
+            </div>
+            <hr>
+            <div class="col-lg-12" style="padding-left:25px;font-size:14px;">
+                <p>${course_overview.short_description}</p>
+            </div>
+            % if is_Program :
+                <div class="col-lg-12">
+                    <h4 style="margin-top: 1rem;
+                                font-family: inherit !important;
+                                font-size: 16px;    
+                                font-weight: bold !important;
+                                margin-bottom: -10px;">
+                        Assessments
+                    </h4>
+                    % for subsection in course_sections[0].get('children', []):
+                        % if len(subsection.get('children', []))>0:
+                        <hr>
+                        <div class ="row subsection-assesment col-lg-12">
+                            <div class="col-lg-5">
+                                <div>
+                                    <h4 class="subsection-title" style="font-size: 18px;
+                                                                    font-weight: 500;
+                                                                    line-height: 2;">
+                                        ${ subsection['display_name'] }
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="col-lg-3"  style="font-size: 13px;font-weight: 100;line-height: 1.5;">
+                                <div>
+                                    <%
+                                        question_cnt = 0
+                                        question_cnt = grades_details.get_subsection_problemcount(str(subsection['id']))
+                                        if str(question_cnt) == '0' and str(subsection['id']) in coding_exams.keys():
+                                            question_cnt = str(len(subsection.get('children', [])))
+                                    %>
+                                    Questions : ${question_cnt}
+                                </div>
+                                <div>
+                                    Duration : 
+                                    % if str(subsection['id']) in exam_durations.keys() :
+                                        ${exam_durations[str(subsection['id'])]} Min(s)
+                                    % else :
+                                        ${_('N/A')}
+                                    % endif
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <center>
+
+                                    <%include file="course-home-action-button.html" 
+                                    args="exam_attempts=exam_attempts,
+                                        content_id=str(subsection['id']), 
+                                        action_link=subsection.get('children', [])[0]['lms_web_url'], 
+                                        open_popup=True,
+                                        exam_configs=exam_configs,
+                                        exam_name=subsection['display_name'],
+                                        ide_exams=ide_exams"/>
+
+                                </center>
+                            </div>
+                        </div>
+                        % endif
+                    % endfor
+                </div>
+            % endif
+            
+        </div>
+        <div class="col-lg-4">
+            <!--<p><h4></h4></p>
+            <div class="clearfix"></div>
+            <div class="clearfix"></div>-->
+            <div class="col-lg-12">
+                <h4 style="margin-top: 1rem;
+                                font-family: inherit !important;
+                                font-size: 16px;    
+                                font-weight: bold !important;
+                                margin-bottom: -10px;">
+                        Instructions
+                    </h4>
+            </div>
+            <hr>
+            <ul>
+                <li>Click on <b>Start Assessment</b> to start the test and ensure that you are attempting the test using the correct email ID.</li>
+                <li>You must click <b>End My Exam</b> after you are done with the test.</li>
+                <li><b>Once the test has started, the timer cannot be paused. You have to complete the test in one attempt.</b></li>
+                <li>
+                    <b>The candidate may not use his or her textbook, course notes, or receive help from a proctor or any other outside source.</b>
+                </li>
+                <li>
+                    It is recommended that you ensure that your system meets Discoveri's compatibility requirements sent over email and check your Internet connection before starting the test.
+                </li>
+                <li>
+                    It is recommended that you attempt the test in an incognito or private window so that any extensions installed do not interfere with the test environment.
+                </li>
+                <li>
+                    We recommend that you close all other windows and tabs to ensure that there are no distractions.
+                </li>
+                % for instruction in json.loads(course_overview.get_course_instructions()):
+                    <li>${instruction['value']}</li>
+                % endfor
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+
+$(function(){
+     var months    = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    for(let i =0; i<$('.date-content').length;i++)
+    {
+        let e = $('.date-content')[i];
+        let dt = new Date(e.innerText);
+        let dt_str = dt.getDate() + ' ' + months[dt.getMonth()] + ' ' + dt.getFullYear();
+        console.log(dt_str);
+        e.innerText = dt_str;
+    }
+});
+</script>

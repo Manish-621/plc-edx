@@ -1,0 +1,32 @@
+<%page expression_filter="h"/>
+
+<%!
+import json
+
+from django.urls import reverse
+from django.conf import settings
+from django.utils.translation import ugettext as _
+
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from openedx.core.djangolib.markup import HTML
+from webpack_loader.templatetags.webpack_loader import render_bundle
+from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_feature_enabled_for_user
+%>
+
+<%inherit file="main.html" />
+<%block name="pagetitle">${_("My Reports")}</%block>
+<div style="height:1027px">
+    <script type='text/javascript' src='https://vyacta-report.pratian.com/javascripts/api/viz_v1.js'></script>
+    <div class='tableauPlaceholder' style='width: 100%;'>
+    	<object class='tableauViz' width='1000' height='1027' style='display:none;'>
+    		<param name='host_url' value='https%3A%2F%2Fvyacta-report.pratian.com%2F' /> 
+    		<param name='embed_code_version' value='3' /> 
+    		<param name='site_root' value='&#47;t&#47;PratianTechnologies' />
+    		<param name='name' value='BoschReports&#47;ManagementDashboard' />
+    		<param name='tabs' value='no' />
+    		<param name='toolbar' value='no' />
+    		<param name='showAppBanner' value='false' />
+    		<param name='filter' value='iframeSizedToWindow=true' />
+    	</object>
+    </div>
+</div>
